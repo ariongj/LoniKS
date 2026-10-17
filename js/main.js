@@ -23,6 +23,7 @@
 
   const phones = (C.phones || []).filter(Boolean);
   const tel = (p) => "tel:" + p.replace(/[^\d+]/g, "");
+  const nb = (p) => p.replace(/ /g, "\u00a0");   // keep phone numbers on one line
   const waNumber = (C.whatsapp || "").replace(/\D/g, "");
   const viberNumber = (C.viber || "").replace(/\D/g, "");
   const place = [C.address, C.city].filter(Boolean).join(", ");
@@ -126,7 +127,7 @@
   addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
   if (phones[0]) {
     $("#headerPhone").href = tel(phones[0]);
-    $("#headerPhone span").textContent = phones[0];
+    $("#headerPhone span").textContent = nb(phones[0]);
   } else $("#headerPhone").hidden = true;
 
   const progressFill = $("#progressFill");
@@ -450,7 +451,7 @@
     offer.product = id;
     offer.w = p.w[2];
     offer.d = p.dpt[2];
-    if (!(p.drives || []).includes(offer.drive)) offer.drive = (p.drives || [])[0] || "";
+    offer.drive = (p.drives || [])[0] || "";
     offer.extras = new Set([...offer.extras].filter((x) => (p.extras || []).includes(x)));
     $("#sStamp").classList.remove("is-on");
     renderOffer();
@@ -636,7 +637,7 @@
 
   function renderContact() {
     const items = [];
-    phones.forEach((p, i) => items.push(`<li><span class="contact__k">${ICON.phone}${i ? "" : esc(t("phone"))}</span><a href="${tel(p)}">${esc(p)}</a></li>`));
+    phones.forEach((p, i) => items.push(`<li><span class="contact__k">${ICON.phone}${i ? "" : esc(t("phone"))}</span><a href="${tel(p)}">${esc(nb(p))}</a></li>`));
     if (C.email) items.push(`<li><span class="contact__k">${ICON.mail}${esc(t("email"))}</span><a href="mailto:${esc(C.email)}">${esc(C.email)}</a></li>`);
     if (waNumber) items.push(`<li><span class="contact__k">${ICON.wa}WhatsApp</span><a href="https://wa.me/${waNumber}" target="_blank" rel="noopener">+${esc(waNumber)} ↗</a></li>`);
     if (place) items.push(`<li><span class="contact__k">${ICON.pin}${esc(t("address"))}</span><span>${esc([place, t("country")].join(", "))}<a class="contact__dir" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}" target="_blank" rel="noopener">${esc(t("directions"))} ↗</a></span></li>`);

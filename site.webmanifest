@@ -1,0 +1,10 @@
+{
+  "name": "Loni Tenda",
+  "short_name": "Loni",
+  "description": "Pergola, xhama dhe tenda nga Shtime, Kosovë.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#14171a",
+  "theme_color": "#14171a",
+  "icons": [{ "src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

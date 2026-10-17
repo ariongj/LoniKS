@@ -1,106 +1,9 @@
 /*
- * Line drawings: a small technical figure for every product card, and the
- * scaled plan / front view that the quote builder draws as you change sizes.
- * Everything is plain SVG markup in the style of an architect's sketch.
+ * The scaled plan / front view that the quote builder draws as you change
+ * sizes, in the style of an architect's drawing.
  */
 window.DRAW = (() => {
   "use strict";
-
-  /* ======================================================================
-     Product figures (viewBox 0 0 240 150)
-     ====================================================================== */
-  const ground = `<path class="f-ground" d="M6 134H234"/><path class="f-thin" d="${Array.from({ length: 19 }, (_, i) => `M${14 + i * 12} 134l-7 7`).join("")}"/>`;
-  const wall = (x) => `<rect class="f-wall" x="${x}" y="12" width="10" height="122"/>`;
-  const shade = (a, b) => `<path class="f-shade" d="M${a} 134H${b}l-10 8H${a - 10}z"/>`;
-  const scallops = (x0, x1, y) => {
-    let d = `M${x0} ${y}`;
-    for (let x = x0; x < x1 - 1; x += 8) d += `q4 5 8 0`;
-    return `<path class="f-line" d="${d}"/>`;
-  };
-  const glassRoof = (tilt = 0) => {
-    const p = [[30, 46 + tilt], [200, 62], [222, 50], [52, 34 + tilt]];
-    const rafters = [0, .25, .5, .75, 1].map((t) => {
-      const x = 30 + 170 * t, y = 46 + tilt + (16 - tilt) * t;
-      return `M${x} ${y}l22 -12`;
-    }).join("");
-    return `<path class="f-glass" d="M${p.map((q) => q.join(" ")).join("L")}Z"/><path class="f-line" d="${rafters}M30 ${46 + tilt}L200 62M52 ${34 + tilt}L222 50"/>`;
-  };
-  const glassRoofFrame = `${wall(20)}<rect class="f-alu-back" x="216" y="50" width="5" height="72"/><rect class="f-alu" x="194" y="62" width="7" height="72"/><path class="f-alu" d="M30 46L200 62v6L30 52z"/>`;
-
-  const FIG = {
-    pergola: () => {
-      const louvres = Array.from({ length: 9 }, (_, k) => {
-        const t = (k + 1) / 10, x = 46 + 34 * t, y = 56 - 16 * t;
-        return `<path class="f-louvre" d="M${x} ${y}h130l3 -5h-130z"/>`;
-      }).join("");
-      return `${shade(52, 176)}
-        <rect class="f-alu-back" x="80" y="40" width="5" height="78"/><rect class="f-alu-back" x="204" y="40" width="5" height="78"/>
-        <path class="f-alu-back" d="M80 36h130v6H80z"/>
-        ${louvres}
-        <path class="f-alu" d="M46 56l34-16v6L46 62zM176 56l34-16v6l-34 16z"/>
-        <rect class="f-alu" x="46" y="56" width="130" height="8"/>
-        <rect class="f-alu" x="46" y="62" width="7" height="72"/><rect class="f-alu" x="169" y="62" width="7" height="72"/>
-        <path class="f-led" d="M56 66h110"/>`;
-    },
-    glassroof: () => `${shade(30, 196)}${glassRoofFrame}${glassRoof()}`,
-    slide: () => {
-      const panels = [26, 72, 118, 164].map((x, i) =>
-        `<rect class="f-glass" x="${x}" y="${36 + (i % 2) * 1}" width="52" height="${92 - (i % 2) * 2}"/><path class="f-thin" d="M${x + 44} 76v12"/>`).join("");
-      return `${panels}<rect class="f-alu" x="22" y="28" width="196" height="8"/><rect class="f-alu" x="22" y="128" width="196" height="6"/>
-        <path class="f-arrow" d="M86 108h40m-7-5 7 5-7 5M86 108l7-5m-7 5 7 5"/>`;
-    },
-    gijot: () => `<rect class="f-alu" x="20" y="16" width="200" height="12" rx="2"/>
-        <rect class="f-alu" x="20" y="28" width="7" height="106"/><rect class="f-alu" x="213" y="28" width="7" height="106"/>
-        <rect class="f-glass f-glass--soft" x="27" y="30" width="186" height="34"/><rect class="f-glass f-glass--soft" x="27" y="64" width="186" height="34"/>
-        <rect class="f-glass" x="27" y="98" width="186" height="32"/><path class="f-alu" d="M27 96h186v4H27z"/>
-        <path class="f-arrow" d="M196 42v40m-5-7 5 7 5-7m-10-33 5-7 5 7"/>`,
-    cassette: () => `${shade(34, 190)}${wall(20)}
-        <rect class="f-alu" x="30" y="32" width="22" height="16" rx="3"/>
-        <path class="f-fab" d="M50 40L204 72v8L50 48z"/>
-        <rect class="f-alu" x="30" y="60" width="7" height="12"/>
-        <path class="f-arm" d="M35 66L128 72L204 80"/>
-        <rect class="f-alu" x="200" y="70" width="11" height="13" rx="2"/>`,
-    classic: () => `${shade(34, 196)}${wall(20)}
-        <circle class="f-alu" cx="40" cy="42" r="7"/>
-        <path class="f-fab" d="M44 36L206 70v8L44 46z"/>
-        <path class="f-fab" d="M202 70h11v16h-11z"/>${scallops(202, 214, 86)}
-        <rect class="f-alu" x="30" y="60" width="7" height="12"/>
-        <path class="f-arm" d="M35 66L132 70L204 78"/>`,
-    window: () => `<path class="f-thin" d="M20 14H220M20 14V134M220 14V134"/>
-        <rect class="f-frame" x="72" y="60" width="96" height="60"/><path class="f-thin" d="M120 60v60M72 90h96"/><rect class="f-glass f-glass--soft" x="74" y="62" width="92" height="56"/>
-        <rect class="f-alu" x="64" y="122" width="112" height="5"/>
-        <rect class="f-alu" x="62" y="34" width="116" height="10" rx="3"/>
-        <path class="f-fab" d="M66 44H174L182 78H58z"/>${scallops(58, 182, 78)}
-        <path class="f-arm" d="M68 64L60 78M172 64L180 78"/>`,
-    screen: () => `${shade(40, 200)}
-        <rect class="f-alu" x="28" y="30" width="184" height="14" rx="2"/>
-        <rect class="f-alu" x="28" y="44" width="9" height="90"/><rect class="f-alu" x="203" y="44" width="9" height="90"/>
-        <path class="f-fab" d="M38 44H202V98H38z"/>
-        <path class="f-thin f-thin--fab" d="${Array.from({ length: 15 }, (_, i) => `M${48 + i * 10} 46v50`).join("")}"/>
-        <rect class="f-alu" x="38" y="98" width="164" height="6"/>
-        <path class="f-arrow f-arrow--on" d="M120 58v24m-6-6 6 6 6-6"/>`,
-    overglass: () => `${shade(30, 196)}${glassRoofFrame}${glassRoof()}
-        <path class="f-fab" d="M30 40L150 51l22-12L52 28z"/>
-        <rect class="f-alu" x="24" y="22" width="22" height="12" rx="3"/>`,
-    underglass: () => `${shade(30, 196)}${glassRoofFrame}
-        <path class="f-fab" d="M32 54L150 65l22-12L54 42z"/>${glassRoof()}`,
-    double: () => `${shade(34, 206)}
-        <rect class="f-alu" x="116" y="44" width="8" height="90"/><rect class="f-alu" x="104" y="36" width="32" height="12" rx="3"/>
-        <path class="f-fab" d="M108 42L26 64v7L108 49zM132 42L214 64v7L132 49z"/>
-        <path class="f-arm" d="M116 76L70 72L32 70M124 76L170 72L208 70"/>
-        <rect class="f-alu" x="20" y="62" width="10" height="12" rx="2"/><rect class="f-alu" x="210" y="62" width="10" height="12" rx="2"/>
-        <path class="f-alu" d="M96 134h48v-4H96z"/>`,
-    parasol: () => `${shade(40, 200)}
-        <path class="f-fab" d="M26 66L120 26L214 66z"/>${scallops(26, 214, 66)}
-        <path class="f-thin f-thin--fab" d="M120 26L58 66M120 26L90 66M120 26L150 66M120 26L182 66"/>
-        <path class="f-arm" d="M120 84L66 64M120 84L174 64"/>
-        <rect class="f-alu" x="117" y="20" width="6" height="114"/>
-        <path class="f-alu" d="M86 134h68v-5H86z"/>`
-  };
-
-  function figure(name) {
-    return `<svg class="fig" viewBox="0 0 240 150" aria-hidden="true">${ground}${(FIG[name] || FIG.pergola)()}</svg>`;
-  }
 
   /* ======================================================================
      Quote builder sketch (viewBox 0 0 420 300)
@@ -129,7 +32,7 @@ window.DRAW = (() => {
     const frame = o.color.hex, fab = o.fabric ? (o.fabric.stripe ? "url(#pStripe)" : o.fabric.hex) : "#e9e0cc";
     const out = [];
 
-    out.push(`<defs><pattern id="pStripe" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#f6efe1"/><rect width="7" height="14" fill="#f2a43a"/></pattern>
+    out.push(`<defs><pattern id="pStripe" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#f6efe1"/><rect width="7" height="14" fill="#9b958a"/></pattern>
       <pattern id="pHatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0v7" stroke="currentColor" stroke-width="1.2"/></pattern></defs>`);
     out.push(`<path class="p-grid" d="${Array.from({ length: 21 }, (_, i) => `M${i * 21} 0V300`).join("")}${Array.from({ length: 15 }, (_, i) => `M0 ${i * 21}H420`).join("")}"/>`);
 
@@ -234,5 +137,5 @@ window.DRAW = (() => {
     return [20, 25, 50, 75, 100, 125, 150, 200].find((r) => r >= real) || 200;
   }
 
-  return { figure, plan, scale, isElevation: (p) => elevations.has(p.plan) };
+  return { plan, scale, isElevation: (p) => elevations.has(p.plan) };
 })();

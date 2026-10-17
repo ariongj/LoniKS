@@ -1,10 +1,26 @@
 {
   "name": "Loni Tenda",
   "short_name": "Loni",
-  "description": "Pergola, xhama dhe tenda nga Shtime, Kosovë.",
+  "description": "Pergola bioklimatike, xhama dhe tenda nga Shtime, Kosovë.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#14171a",
-  "theme_color": "#14171a",
-  "icons": [{ "src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+  "background_color": "#0c0c0d",
+  "theme_color": "#0c0c0d",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
 }

@@ -27,7 +27,14 @@
   const viberNumber = (C.viber || "").replace(/\D/g, "");
   const place = [C.address, C.city].filter(Boolean).join(", ");
   const mapsQuery = C.mapsQuery || (place ? `${C.name}, ${place}` : "");
-  const fmtMin = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(Math.round(m) % 60).padStart(2, "0")}`;
+  const withPhotos = C.products.filter((p) => (p.photos || []).length);
+  const isRender = (src) => !/\/(bioklimatike|mbuloje-xhami|mbuloje-xhami-render|gijotine-\d|slide-\d|zip-\d|mbyllje-[a-z]+|collage)\.webp$/.test(src);
+  // Every image has a 960 px sibling: name-960.webp.
+  const small = (src) => src.replace(/\.webp$/, "-960.webp");
+  const srcset = (src) => `${small(src)} 960w, ${src} 1800w`;
+  const img = (src, alt, sizes, extra = "") =>
+    `<img src="${esc(small(src))}" srcset="${esc(srcset(src))}" sizes="${sizes}" alt="${esc(alt)}" loading="lazy" decoding="async" ${extra}/>`;
+  const fit = (src) => (innerWidth * (devicePixelRatio || 1) <= 960 ? small(src) : src);
 
   const ICON = {
     phone: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
@@ -36,11 +43,32 @@
     pin: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
     clock: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     copy: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
-    ig: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
-    fb: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v7h4v-7h3l1-4h-4V8z"/></svg>',
     arrow: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
-    diag: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>'
+    plus: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+    photos: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>',
+    social: {
+      instagram: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
+      facebook: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v7h4v-7h3l1-4h-4V8z"/></svg>',
+      youtube: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></svg>',
+      linkedin: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4M12 10v7"/></svg>'
+    }
   };
+
+  // Background photos load only once they come near the screen.
+  const bgQueue = new Map();
+  const bgIO = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      e.target.style.backgroundImage = `url("${bgQueue.get(e.target)}")`;
+      bgIO.unobserve(e.target);
+    });
+  }, { rootMargin: "600px 0px" }) : null;
+  function lazyBg(el, src) {
+    if (!bgIO) { el.style.backgroundImage = `url("${src}")`; return; }
+    if (el.style.backgroundImage) { el.style.backgroundImage = `url("${src}")`; return; }
+    bgQueue.set(el, src);
+    bgIO.observe(el);
+  }
 
   /* ======================================================================
      Language
@@ -68,23 +96,24 @@
     });
     $$(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
     $$(".hero__title .line").forEach((l) => (l.innerHTML = `<span>${l.innerHTML}</span>`));
+    $$(".js-years").forEach((el) => (el.textContent = C.years));
     splitManifesto();
     renderAll();
   }
 
   function renderAll() {
-    $$(".js-city").forEach((el) => (el.textContent = [C.city, t("country")].filter(Boolean).join(", ")));
-    renderTabs();
+    renderHeroNav();
+    renderFeature();
     renderCatalog();
+    renderClosures();
+    renderCerts();
+    renderStory();
     renderOffer();
     renderContact();
-    renderRemote();
-    if (scene && scene.state.info) onScene(scene.state.info, true);
-    renderSunChip();
   }
 
   /* ======================================================================
-     Header, menu, progress
+     Header, menu, progress, dock
      ====================================================================== */
   const header = $("#header");
   const burger = $("#burger");
@@ -95,8 +124,12 @@
   burger.addEventListener("click", () => setMenu(!document.body.classList.contains("menu-open")));
   $$("#nav a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
   addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
+  if (phones[0]) {
+    $("#headerPhone").href = tel(phones[0]);
+    $("#headerPhone span").textContent = phones[0];
+  } else $("#headerPhone").hidden = true;
 
-  const awningFill = $("#awningFill");
+  const progressFill = $("#progressFill");
   const dock = $("#dock");
   let ticking = false;
   function onScroll() {
@@ -105,30 +138,15 @@
     requestAnimationFrame(() => {
       ticking = false;
       const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
-      header.classList.toggle("is-scrolled", y > 20);
-      awningFill.style.transform = `scaleX(${max > 0 ? clamp(y / max, 0, 1) : 0})`;
-      const heroEnd = $(".hero").offsetHeight * 0.7;
-      const offerTop = $("#offer").getBoundingClientRect();
-      dock.classList.toggle("is-on", y > heroEnd && !(offerTop.top < innerHeight && offerTop.bottom > innerHeight * .4));
+      header.classList.toggle("is-scrolled", y > 30);
+      progressFill.style.transform = `scaleX(${max > 0 ? clamp(y / max, 0, 1) : 0})`;
+      const offer = $("#offer").getBoundingClientRect();
+      dock.classList.toggle("is-on", y > innerHeight * 0.7 && !(offer.top < innerHeight && offer.bottom > innerHeight * 0.4));
       lightManifesto();
-      turnFinale();
+      parallax();
     });
   }
   addEventListener("scroll", onScroll, { passive: true });
-
-  // The ticker runs faster while the page is scrolling.
-  const tickerAnim = () => $("#ticker").getAnimations?.()[0];
-  let lastY = scrollY, boost = 0;
-  if (!reduceMotion) {
-    (function loop() {
-      const dy = Math.abs(scrollY - lastY);
-      lastY = scrollY;
-      boost = boost * 0.9 + Math.min(dy, 80) * 0.06;
-      const a = tickerAnim();
-      if (a) a.playbackRate = 1 + boost;
-      requestAnimationFrame(loop);
-    })();
-  }
 
   /* ======================================================================
      Reveal on scroll
@@ -143,8 +161,8 @@
      ====================================================================== */
   const manifesto = $("#manifesto");
   function splitManifesto() {
-    const text = lang === "sq" ? manifesto.dataset.sq ?? manifesto.textContent : EN["about.text"];
     if (manifesto.dataset.sq === undefined) manifesto.dataset.sq = manifesto.textContent;
+    const text = lang === "sq" ? manifesto.dataset.sq : EN["intro.text"];
     manifesto.innerHTML = text.split(/\s+/).map((w) => `<span>${esc(w)}</span>`).join(" ");
     lightManifesto();
   }
@@ -152,195 +170,264 @@
     const words = manifesto.children;
     if (!words.length) return;
     const r = manifesto.getBoundingClientRect();
-    const p = reduceMotion ? 1 : clamp((innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.35), 0, 1);
+    const p = reduceMotion ? 1 : clamp((innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.3), 0, 1);
     const n = Math.round(p * words.length);
     for (let i = 0; i < words.length; i++) words[i].classList.toggle("on", i < n);
   }
 
   /* ======================================================================
-     Hero scene and remote control
+     Hero: each photo opens through louvres
      ====================================================================== */
-  const CHANNELS = ["pergola", "screen", "glass", "led"];
-  let chIndex = 0;
-  let scene = null;
-  let timeTouched = false;
-  const sceneHost = $("#scene");
+  const slides = (C.hero || []).filter((s) => s.src);
+  const heroMedia = $("#heroMedia"), heroImg = $("#heroImg"), heroSlats = $("#heroSlats");
+  const sizes = {};
+  let current = 0, busy = false, timer = 0, paused = false;
+  const SLIDE_MS = 7000;
 
-  try {
-    scene = Scene.create(sceneHost, Object.assign({}, C.scene, { timezone: C.timezone, reduceMotion }));
-  } catch (err) {
-    console.error(err);
-    sceneHost.classList.add("is-broken");
-  }
-
-  const ch = () => CHANNELS[chIndex];
-  const toRange = (c, v) => c === "pergola" ? Math.round(v / 135 * 100) : Math.round(v * 100);
-  const fromRange = (c, v) => c === "pergola" ? v / 100 * 135 : v / 100;
-  function valueText(c, v) {
-    if (c === "pergola") return `${Math.round(v)}°`;
-    if (c === "led") return v > 0.5 ? t("on") : t("off");
-    return `${Math.round(v * 100)}%`;
+  function loadSize(src) {
+    if (sizes[src]) return Promise.resolve(sizes[src]);
+    return new Promise((res) => {
+      const im = new Image();
+      im.onload = () => res((sizes[src] = { w: im.naturalWidth, h: im.naturalHeight }));
+      im.onerror = () => res((sizes[src] = { w: 16, h: 9 }));
+      im.src = src;
+    });
   }
 
-  function renderRemote() {
-    if (!scene) return;
-    const c = ch();
-    $("#chName").textContent = t("ch")[c];
-    $("#chDots").innerHTML = CHANNELS.map((_, i) => `<i class="${i === chIndex ? "on" : ""}"></i>`).join("");
-    const pos = scene.state.ch[c].pos;
-    $("#chVal").textContent = valueText(c, pos);
-    const range = $("#chRange");
-    range.step = c === "led" ? 100 : 1;
-    if (document.activeElement !== range) range.value = toRange(c, c === "led" ? scene.state.ch[c].target : pos);
-    range.setAttribute("aria-label", t("ch")[c]);
-    range.setAttribute("aria-valuetext", valueText(c, pos));
+  function renderHeroNav() {
+    const nav = $("#heroNav");
+    if (!slides.length) { $(".hero__foot").hidden = true; return; }
+    nav.innerHTML = slides.map((s, i) =>
+      `<button type="button" class="slides__item" data-slide="${i}" aria-pressed="${i === current}" aria-label="${esc(local(s))}"><i><b></b></i><span aria-hidden="true">${esc(local(s))}</span></button>`).join("");
+    restartBar();
+  }
+  function restartBar() {
+    $$("#heroNav .slides__item").forEach((b, i) => {
+      b.setAttribute("aria-pressed", String(i === current));
+      b.classList.remove("is-run");
+      if (i === current && !reduceMotion && !paused) { void b.offsetWidth; b.classList.add("is-run"); }
+    });
   }
 
-  const flash = () => {
-    const led = $("#remoteLed");
-    led.classList.remove("is-on");
-    void led.offsetWidth;
-    led.classList.add("is-on");
-  };
-  function manual(c) {
-    if ((c === "pergola" || c === "screen") && scene.state.auto) { scene.setAuto(false); $("#autoBtn").setAttribute("aria-pressed", "false"); }
+  async function show(next) {
+    if (busy || !slides.length) return;
+    next = (next + slides.length) % slides.length;
+    if (next === current && heroImg.style.backgroundImage) return;
+    busy = true;
+    const src = fit(slides[next].src);
+    const { w, h } = await loadSize(src);
+    const W = heroMedia.clientWidth, H = heroMedia.clientHeight;
+    const first = !heroImg.style.backgroundImage;
+
+    if (first || reduceMotion) {
+      heroImg.style.backgroundImage = `url("${src}")`;
+      heroImg.classList.remove("is-zoom"); void heroImg.offsetWidth; heroImg.classList.add("is-zoom");
+    } else {
+      // Slice the next photo into horizontal louvres, sized exactly like background-size: cover.
+      const n = W < 700 ? 7 : 11;
+      const s = Math.max(W / w, H / h), bw = w * s, bh = h * s, ox = (W - bw) / 2, oy = (H - bh) / 2;
+      heroSlats.innerHTML = Array.from({ length: n }, (_, i) => {
+        const top = Math.floor((H / n) * i), hh = Math.ceil(H / n) + 1;
+        return `<i style="top:${top}px;height:${hh}px;background-image:url('${src}');background-size:${bw}px ${bh}px;background-position:${ox}px ${oy - top}px;animation-delay:${i * 55}ms"></i>`;
+      }).join("");
+      heroSlats.classList.add("is-on");
+      await new Promise((r) => setTimeout(r, 1000 + n * 55));
+      heroImg.style.backgroundImage = `url("${src}")`;
+      heroImg.classList.remove("is-zoom"); void heroImg.offsetWidth; heroImg.classList.add("is-zoom");
+      heroSlats.classList.remove("is-on");
+      heroSlats.innerHTML = "";
+    }
+    current = next;
+    restartBar();
+    // preload the following photo
+    if (slides.length > 1) loadSize(fit(slides[(current + 1) % slides.length].src));
+    busy = false;
+    schedule();
   }
-  function press(dir) {
-    if (!scene) return;
-    const c = ch();
-    const s = scene.state.ch[c];
-    flash();
-    manual(c);
-    if (dir === 0) return scene.stop(c);
-    if (c === "pergola") {
-      if (dir > 0) scene.setTarget(c, s.pos < 89.5 ? 90 : 135);
-      else scene.setTarget(c, s.pos > 90.5 ? 90 : 0);
-    } else if (c === "screen") scene.moveTo(c, dir < 0);
-    else scene.moveTo(c, dir > 0);
+  function schedule() {
+    clearTimeout(timer);
+    if (!paused && !reduceMotion && slides.length > 1) timer = setTimeout(() => show(current + 1), SLIDE_MS);
   }
-  $("#keyUp").addEventListener("click", () => press(1));
-  $("#keyDown").addEventListener("click", () => press(-1));
-  $("#keyStop").addEventListener("click", () => press(0));
-  $("#chPrev").addEventListener("click", () => { chIndex = (chIndex + CHANNELS.length - 1) % CHANNELS.length; flash(); renderRemote(); });
-  $("#chNext").addEventListener("click", () => { chIndex = (chIndex + 1) % CHANNELS.length; flash(); renderRemote(); });
-  $("#chRange").addEventListener("input", (e) => {
-    if (!scene) return;
-    const c = ch();
-    manual(c);
-    scene.setTarget(c, fromRange(c, +e.target.value));
+  function pause(p) { paused = p; restartBar(); schedule(); }
+
+  if (slides.length) {
+    $("#heroNav").addEventListener("click", (e) => { const b = e.target.closest("[data-slide]"); if (b) show(+b.dataset.slide); });
+    $("#heroPrev").addEventListener("click", () => show(current - 1));
+    $("#heroNext").addEventListener("click", () => show(current + 1));
+    const hero = $(".hero");
+    hero.addEventListener("focusin", () => pause(true));
+    hero.addEventListener("focusout", () => pause(false));
+    document.addEventListener("visibilitychange", () => pause(document.hidden));
+    let sx = null;
+    heroMedia.parentElement.addEventListener("touchstart", (e) => (sx = e.touches[0].clientX), { passive: true });
+    heroMedia.parentElement.addEventListener("touchend", (e) => {
+      if (sx === null) return;
+      const dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
+      sx = null;
+    });
+  } else $(".hero").classList.add("is-empty");
+
+  /* ======================================================================
+     Partners, feature
+     ====================================================================== */
+  $("#partners").innerHTML = (C.partners || []).map((p) => `<li>${esc(p)}</li>`).join("");
+
+  let configIndex = 0;
+  const specList = (specs) => (specs || []).map(([k, v]) => `<div><dt>${esc(local(k))}</dt><dd>${esc(local(v))}</dd></div>`).join("");
+  function renderFeature() {
+    const f = C.featured;
+    const p = C.products.find((x) => x.id === f.product);
+    if (!f || !p) { $("#feature").hidden = true; return; }
+    $("#featureKicker").textContent = f.name || local(p);
+    $("#featureSpecs").innerHTML = specList(p.specs);
+    const configs = f.configs || [];
+    $("#configTabs").innerHTML = configs.map((c, i) =>
+      `<button type="button" data-config="${i}" aria-pressed="${i === configIndex}">${esc(local(c))}</button>`).join("");
+    const stage = $("#configStage");
+    if (!stage.children.length) {
+      stage.innerHTML = configs.map((c, i) =>
+        img(c.img, "", "(max-width: 1080px) 100vw, 60vw", `class="${i === configIndex ? "is-on" : ""}"`)).join("") +
+        `<span class="configs__label" id="configLabel"></span>`;
+    }
+    $$("img", stage).forEach((im, i) => im.setAttribute("alt", `${local(p)} · ${local(configs[i])}`));
+    $("#configLabel").textContent = `${String(configIndex + 1).padStart(2, "0")} / ${String(configs.length).padStart(2, "0")} · ${local(configs[configIndex] || {})}`;
+  }
+  $("#configTabs").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-config]");
+    if (!b) return;
+    configIndex = +b.dataset.config;
+    $$("#configTabs button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    $$("#configStage img").forEach((im, i) => im.classList.toggle("is-on", i === configIndex));
+    renderFeature();
   });
-
-  const timeRange = $("#timeRange");
-  timeRange.addEventListener("input", () => {
-    timeTouched = true;
-    scene && scene.setTime(+timeRange.value);
-  });
-  $("#nowBtn").addEventListener("click", () => {
-    timeTouched = false;
-    if (!scene) return;
-    const now = scene.nowMinutes();
-    timeRange.value = now;
-    scene.setTime(now);
-  });
-  $("#autoBtn").addEventListener("click", (e) => {
-    if (!scene) return;
-    const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
-    e.currentTarget.setAttribute("aria-pressed", String(on));
-    scene.setAuto(on);
-  });
-  $("#rainBtn").addEventListener("click", (e) => {
-    if (!scene) return;
-    const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
-    e.currentTarget.setAttribute("aria-pressed", String(on));
-    scene.setRain(on);
-  });
-
-  const shown = {};
-  const setText = (id, v) => { if (shown[id] !== v) { shown[id] = v; $(id).textContent = v; } };
-  function onScene(info, force) {
-    if (force) for (const k in shown) delete shown[k];
-    setText("#rShade", info.night ? t("night") : info.rain ? t("rain") : `${Math.round(info.shade * 100)}%`);
-    setText("#rSun", info.night ? "–" : `${Math.round(info.elevation)}°`);
-    setText("#rTime", fmtMin(info.minutes));
-    const msg = info.rain ? t("msgRain") : info.night ? t("msgNight") : info.behind ? t("msgBehind") : info.auto ? t("msgAuto") : t("msgHint");
-    setText("#sceneMsg", msg);
-    sceneHost.dataset.night = String(info.night);
-    renderRemote();
-  }
-
-  function renderSunChip() {
-    const chip = $("#sunChip");
-    if (!scene) { chip.hidden = true; return; }
-    const now = SUN.partsIn(new Date(), C.timezone);
-    const { elevation } = SUN.position(new Date(), C.scene.lat, C.scene.lon);
-    const night = elevation < 0;
-    chip.dataset.state = night ? "night" : "day";
-    $("span", chip).textContent = `${C.city} · ` + fill(t(night ? "chipNight" : "chipDay"), { t: fmtMin(now.min), e: Math.round(elevation) });
-  }
-
-  if (scene) {
-    const now = scene.nowMinutes();
-    timeRange.value = clamp(now, +timeRange.min, +timeRange.max);
-    scene.setTime(now);
-    scene.onUpdate((info) => onScene(info));
-    setInterval(() => {
-      renderSunChip();
-      if (!timeTouched) { const m = scene.nowMinutes(); timeRange.value = m; scene.setTime(m); }
-    }, 30000);
-  }
-
-  // A short demo once the page is in: the louvres find the sun (and the light comes on at night).
-  function intro() {
-    if (!scene) return;
-    setTimeout(() => {
-      $("#autoBtn").setAttribute("aria-pressed", "true");
-      scene.setAuto(true);
-      if (scene.state.sun.elevation < 2) { chIndex = 3; scene.setTarget("led", 1); }
-      renderRemote();
-    }, reduceMotion ? 0 : 500);
-  }
 
   /* ======================================================================
      Products
      ====================================================================== */
-  let activeCat = "all";
-  function renderTabs() {
-    const tabs = [["all", t("all")], ...Object.entries(C.categories).map(([k, v]) => [k, local(v)])];
-    $("#productTabs").innerHTML = tabs.map(([k, label]) =>
-      `<button type="button" class="tab" data-cat="${k}" aria-pressed="${k === activeCat}">${esc(label)}</button>`).join("");
-  }
-  $("#productTabs").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-cat]");
-    if (!b) return;
-    activeCat = b.dataset.cat;
-    $$("#productTabs .tab").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    $$("#catalog .card").forEach((c) => (c.hidden = activeCat !== "all" && c.dataset.cat !== activeCat));
-  });
-
   function renderCatalog() {
-    $("#catalog").innerHTML = C.products.map((p, i) => `
-      <li class="card reveal" data-cat="${p.cat}" ${activeCat !== "all" && p.cat !== activeCat ? "hidden" : ""}>
-        <div class="card__fig">
-          ${p.photo ? `<img src="${esc(p.photo)}" alt="${esc(local(p))}" loading="lazy" decoding="async" />` : DRAW.figure(p.fig)}
-          <span class="card__no">${t("fig")} ${String(i + 1).padStart(2, "0")}</span>
-          ${p.featured ? `<span class="card__badge">${esc(t("featured"))}</span>` : ""}
-        </div>
+    // The first card spans two columns; a card left alone on the last row spans all three.
+    const lonely = (withPhotos.length + 1) % 3 === 1;
+    $("#catalog").innerHTML = withPhotos.map((p, i) => {
+      const src = p.photos[0];
+      const n = p.photos.length;
+      const keys = (p.specs || []).slice(0, 2).map(([k, v]) => `<li><span>${esc(local(k))}</span>${esc(local(v))}</li>`).join("");
+      return `
+      <li class="card reveal${i === 0 ? " card--wide" : ""}${lonely && i === withPhotos.length - 1 ? " card--wide card--full" : ""}">
+        <button type="button" class="card__media${isRender(src) ? " card__media--render" : ""}" data-gallery="${p.id}" aria-label="${esc(local(p))}: ${n} ${esc(t("photos"))}">
+          ${img(src, "", i === 0 || (lonely && i === withPhotos.length - 1) ? "(max-width: 960px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw")}
+          <span class="card__count">${ICON.photos}${n}</span>
+        </button>
         <div class="card__body">
           <p class="card__cat">${esc(local(C.categories[p.cat]))}</p>
           <h3 class="card__title">${esc(local(p))}</h3>
           <p class="card__text">${esc(local(p.d))}</p>
-          <ul class="card__tags">${(p.tags || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
-          <button type="button" class="card__cta" data-quote="${p.id}">${esc(t("request"))}${ICON.arrow}</button>
+          <ul class="card__keys">${keys}</ul>
+          <div class="card__actions">
+            <button type="button" class="card__cta" data-quote="${p.id}">${esc(t("request"))}${ICON.arrow}</button>
+            <button type="button" class="card__more" data-gallery="${p.id}">${esc(t("details"))}${ICON.plus}</button>
+          </div>
         </div>
+      </li>`;
+    }).join("");
+    $("#moreList").innerHTML = C.products.filter((p) => !(p.photos || []).length).map((p) => `
+      <li>
+        <div><h4>${esc(local(p))}</h4><p>${esc(local(p.d))}</p></div>
+        <button type="button" class="card__cta" data-quote="${p.id}">${esc(t("request"))}${ICON.arrow}</button>
       </li>`).join("");
     observe($("#catalog"));
   }
-  $("#catalog").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-quote]");
-    if (!b) return;
-    selectProduct(b.dataset.quote);
+
+  function quote(id) {
+    selectProduct(id);
     $("#offer").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
+  }
+  document.addEventListener("click", (e) => {
+    const q = e.target.closest("[data-quote]");
+    if (q) { if (viewer.open) viewer.close(); quote(q.dataset.quote); return; }
+    const g = e.target.closest("[data-gallery]");
+    if (g) openViewer(g.dataset.gallery);
   });
+
+  /* ======================================================================
+     Product viewer
+     ====================================================================== */
+  const viewer = $("#viewer");
+  let vProduct = null, vIndex = 0;
+  function openViewer(id, index = 0) {
+    const p = C.products.find((x) => x.id === id);
+    if (!p || !(p.photos || []).length) return;
+    vProduct = p;
+    $("#viewerCat").textContent = local(C.categories[p.cat]);
+    $("#viewerTitle").textContent = local(p);
+    $("#viewerText").textContent = local(p.d);
+    $("#viewerSpecs").innerHTML = specList(p.specs);
+    $("#viewerQuote").dataset.quote = p.id;
+    $("#viewerThumbs").innerHTML = p.photos.map((src, i) =>
+      `<button type="button" data-thumb="${i}" class="${isRender(src) ? "is-render" : ""}" aria-label="${i + 1} / ${p.photos.length}"><img src="${esc(small(src))}" alt="" loading="lazy" /></button>`).join("");
+    const multi = p.photos.length > 1;
+    $("#viewerPrev").hidden = $("#viewerNext").hidden = $("#viewerThumbs").hidden = !multi;
+    showPhoto(index);
+    if (typeof viewer.showModal === "function") viewer.showModal(); else viewer.setAttribute("open", "");
+    document.body.classList.add("viewer-open");
+  }
+  function showPhoto(i) {
+    const photos = vProduct.photos;
+    vIndex = (i + photos.length) % photos.length;
+    const src = photos[vIndex];
+    const box = $("#viewerImg");
+    box.classList.toggle("is-render", isRender(src));
+    box.innerHTML = `<img src="${esc(small(src))}" srcset="${esc(srcset(src))}" sizes="(max-width: 1080px) 100vw, 60vw" alt="${esc(local(vProduct))} · ${vIndex + 1}/${photos.length}" decoding="async" />`;
+    $$("#viewerThumbs button").forEach((b, j) => b.setAttribute("aria-current", String(j === vIndex)));
+  }
+  $("#viewerPrev").addEventListener("click", () => showPhoto(vIndex - 1));
+  $("#viewerNext").addEventListener("click", () => showPhoto(vIndex + 1));
+  $("#viewerThumbs").addEventListener("click", (e) => { const b = e.target.closest("[data-thumb]"); if (b) showPhoto(+b.dataset.thumb); });
+  $("#viewerClose").addEventListener("click", () => viewer.close());
+  viewer.addEventListener("close", () => document.body.classList.remove("viewer-open"));
+  viewer.addEventListener("click", (e) => { if (e.target === viewer) viewer.close(); });
+  viewer.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") showPhoto(vIndex - 1);
+    if (e.key === "ArrowRight") showPhoto(vIndex + 1);
+  });
+
+  /* ======================================================================
+     Closures, certificates, story
+     ====================================================================== */
+  function renderClosures() {
+    const list = (C.closures || []).filter((c) => c.img);
+    $("#closures").hidden = !list.length;
+    $("#closureGrid").innerHTML = list.map((c, i) => `
+      <li class="tile reveal" style="transition-delay:${i * 70}ms">
+        ${img(c.img, local(c), i === 0 ? "(max-width: 640px) 100vw, 40vw" : "(max-width: 640px) 100vw, 33vw")}
+        <div class="tile__cap"><span class="tile__n">${String(i + 1).padStart(2, "0")}</span><h3>${esc(local(c))}</h3>
+          ${c.product ? `<button type="button" class="tile__link" data-gallery="${c.product}">${esc(t("details"))}${ICON.arrow}</button>` : ""}</div>
+      </li>`).join("");
+    observe($("#closureGrid"));
+  }
+
+  function renderCerts() {
+    $("#certs").innerHTML = (C.certificates || []).map((c, i) => `
+      <li class="cert reveal" style="transition-delay:${i * 60}ms">
+        <span class="cert__issuer">${esc(c.issuer)}</span>
+        <b class="cert__code">${esc(c.code)}</b>
+        <span class="cert__label">${esc(local(c))}</span>
+        <svg class="cert__seal" viewBox="0 0 48 48" aria-hidden="true"><use href="#badge"/></svg>
+      </li>`).join("");
+    $("#certHolder").textContent = fill(t("holder"), { name: C.legalName, address: C.address, city: C.city });
+    observe($("#certs"));
+  }
+
+  function renderStory() {
+    const s = C.story || {};
+    $("#storyNum").textContent = C.years;
+    if (s.collage) lazyBg($("#storyNum"), fit(s.collage));
+    $(".story__num").classList.toggle("has-photo", !!s.collage);
+    const photos = [[s.factory, t("factory")], [s.team, t("team")]].filter(([src]) => src);
+    $("#storyPhotos").innerHTML = photos.map(([src, label]) =>
+      `<figure class="reveal">${img(src, label, "(max-width: 1080px) 50vw, 25vw")}<figcaption>${esc(label)}</figcaption></figure>`).join("");
+    observe($("#storyPhotos"));
+  }
 
   /* ======================================================================
      Quote builder
@@ -375,9 +462,14 @@
 
   function renderOffer() {
     const p = prod();
-
-    $("#pickProduct").innerHTML = C.products.map((x) =>
-      `<button type="button" class="pick__item" data-product="${x.id}" aria-pressed="${x.id === p.id}">${DRAW.figure(x.fig)}<span>${esc(local(x))}</span></button>`).join("");
+    const tile = (x) => {
+      const src = x.photos[0];
+      return `<button type="button" class="pick__item" data-product="${x.id}" aria-pressed="${x.id === p.id}">
+        <img src="${esc(small(src))}" alt="" loading="lazy" class="${isRender(src) ? "is-render" : ""}" /><span>${esc(local(x))}</span></button>`;
+    };
+    const pill = (x) => `<button type="button" class="pick__pill" data-product="${x.id}" aria-pressed="${x.id === p.id}">${esc(local(x))}</button>`;
+    $("#pickProduct").innerHTML = `<div class="pick__tiles">${withPhotos.map(tile).join("")}</div>
+      <div class="pick__pills">${C.products.filter((x) => !(x.photos || []).length).map(pill).join("")}</div>`;
 
     const W = $("#dimW"), D = $("#dimD");
     [W.min, W.max] = [p.w[0], p.w[1]];
@@ -438,8 +530,8 @@
     $("#sExtras").textContent = offer.extras.size ? [...offer.extras].map((x) => local(C.extras[x])).join(", ") : t("noExtras");
     const name = $("#fName").value.trim(), where = $("#fPlace").value.trim();
     $("#sClient").textContent = [name, where].filter(Boolean).join(", ") || "–";
-    const now = SUN.partsIn(new Date(), C.timezone);
-    $("#sDate").textContent = `${now.d} ${t("months")[now.m - 1]} ${now.y}`;
+    const now = new Date();
+    $("#sDate").textContent = `${now.getDate()} ${t("months")[now.getMonth()]} ${now.getFullYear()}`;
 
     $("#submitLabel").textContent = waNumber ? t("sendWa") : C.email ? t("sendEmail") : t("copy");
     $("#formFine").textContent = waNumber ? t("fineWa") : C.email ? fill(t("fineEmail"), { email: C.email }) : t("fineNone");
@@ -461,9 +553,8 @@
     if (d.fabric) offer.fabric = d.fabric;
     if (d.drive) offer.drive = d.drive;
     if (d.extra) offer.extras.has(d.extra) ? offer.extras.delete(d.extra) : offer.extras.add(d.extra);
-    const group = b.parentElement;
     if (d.extra) b.setAttribute("aria-pressed", String(offer.extras.has(d.extra)));
-    else $$("button", group).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    else $$("button", b.parentElement).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     renderSheet();
   });
   $("#dimW").addEventListener("input", (e) => { offer.w = +e.target.value; renderSheet(); });
@@ -474,8 +565,7 @@
     const p = prod();
     const fabric = p.fabric ? C.fabrics.find((x) => x.id === offer.fabric) : null;
     const lines = [
-      t("msgHead"),
-      "",
+      t("msgHead"), "",
       `${t("msgProduct")}: ${local(p)}`,
       `${t("msgSize")}: ${sizeText()}`,
       `${t("msgArea")}: ${(offer.w * offer.d).toFixed(2)} m²`,
@@ -538,8 +628,12 @@
   });
 
   /* ======================================================================
-     Contact & map
+     Contact, social, map
      ====================================================================== */
+  const socials = Object.entries(C.social || {}).filter(([, url]) => url);
+  const socialLinks = socials.map(([k, url]) =>
+    `<a href="${esc(url)}" target="_blank" rel="noopener" aria-label="${k[0].toUpperCase() + k.slice(1)}">${ICON.social[k] || ""}</a>`).join("");
+
   function renderContact() {
     const items = [];
     phones.forEach((p, i) => items.push(`<li><span class="contact__k">${ICON.phone}${i ? "" : esc(t("phone"))}</span><a href="${tel(p)}">${esc(p)}</a></li>`));
@@ -554,11 +648,9 @@
       }).join("");
       items.push(`<li><span class="contact__k">${ICON.clock}${esc(t("hours"))}</span><span class="contact__hours">${rows}</span></li>`);
     }
-    const social = [];
-    if (C.instagram) social.push(`<a href="https://www.instagram.com/${esc(C.instagram)}/" target="_blank" rel="noopener" aria-label="Instagram">${ICON.ig}</a>`);
-    if (C.facebook) social.push(`<a href="${esc(C.facebook)}" target="_blank" rel="noopener" aria-label="Facebook">${ICON.fb}</a>`);
-    if (social.length) items.push(`<li class="contact__social">${social.join("")}</li>`);
+    if (socials.length) items.push(`<li><span class="contact__k">${esc(t("follow"))}</span><span class="contact__social">${socialLinks}</span></li>`);
     $("#contactList").innerHTML = items.join("");
+    $("#footerSocial").innerHTML = socialLinks;
     const dockCall = $("#dockCall");
     if (phones[0]) dockCall.href = tel(phones[0]);
     else dockCall.hidden = true;
@@ -578,14 +670,17 @@
   }
 
   /* ======================================================================
-     Finale: louvres that turn as you scroll
+     Finale photo with a gentle parallax
      ====================================================================== */
-  const finaleLouvres = $("#finaleLouvres");
-  finaleLouvres.innerHTML = "<i></i>".repeat(14);
-  function turnFinale() {
-    const r = finaleLouvres.getBoundingClientRect();
-    const p = clamp((innerHeight - r.top) / (innerHeight + r.height), 0, 1);
-    finaleLouvres.style.setProperty("--turn", `${(reduceMotion ? 0.5 : p) * 90}deg`);
+  const finalePhoto = $(".finale__photo");
+  const finaleSrc = (slides[1] || slides[0] || {}).src;
+  if (finaleSrc) lazyBg(finalePhoto, fit(finaleSrc));
+  function parallax() {
+    if (reduceMotion) return;
+    const r = finalePhoto.parentElement.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    const p = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
+    finalePhoto.style.transform = `translate3d(0, ${(p * 60).toFixed(1)}px, 0) scale(1.12)`;
   }
 
   /* ======================================================================
@@ -607,15 +702,14 @@
       $$("[data-magnetic].is-pulled").forEach((x) => { if (x !== b) { x.classList.remove("is-pulled"); x.style.transform = ""; } });
       if (!b) return;
       const r = b.getBoundingClientRect();
-      const dx = (e.clientX - (r.left + r.width / 2)) * 0.18, dy = (e.clientY - (r.top + r.height / 2)) * 0.28;
+      const dx = (e.clientX - (r.left + r.width / 2)) * 0.16, dy = (e.clientY - (r.top + r.height / 2)) * 0.26;
       b.classList.add("is-pulled");
       b.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`;
     });
   }
 
   $("#year").textContent = String(new Date().getFullYear());
-  if (C.legalName) $("#legalName").textContent = C.legalName;
-  if (C.since) { $("#since").hidden = false; $("#sinceYear").textContent = C.since; }
+  $("#legalName").textContent = C.name;
 
   $$(".lang button").forEach((b) => b.addEventListener("click", () => applyLang(b.dataset.lang)));
 
@@ -623,16 +717,15 @@
   observe();
   onScroll();
 
+  // The loader lifts as soon as the first hero photo is in (at most 1.2 s), never waiting for the whole page.
+  let lifted = false;
   function ready() {
+    if (lifted) return;
+    lifted = true;
     document.body.classList.remove("is-loading");
     $("#loader").classList.add("is-done");
-    intro();
   }
-  if (reduceMotion) ready();
-  else {
-    const started = performance.now();
-    const go = () => setTimeout(ready, Math.max(0, 900 - (performance.now() - started)));
-    if (document.readyState === "complete") go();
-    else addEventListener("load", go, { once: true });
-  }
+  const started = performance.now();
+  show(0).then(() => setTimeout(ready, reduceMotion ? 0 : Math.max(0, 350 - (performance.now() - started))));
+  setTimeout(ready, 1200);
 })();

@@ -8,7 +8,7 @@ A fast, single-page site with no build step and no dependencies. It is in **Alba
 
 ## What makes it different
 
-- **Photos that open like louvres.** The hero shows Loni's own installations. Each new photo is sliced into horizontal slats that turn open, the way a bioclimatic roof does. It plays on its own, can be swiped on phones, and pauses while you use it. The loader opens the same way.
+- **Photos that open like louvres.** The hero shows Loni's own installations (the two photos sharp enough for full screen; add more in `hero` once there are photos at least 1600 px wide). Each new photo is sliced into horizontal slats that turn open, the way a bioclimatic roof does. It plays on its own, can be swiped on phones, and pauses while you use it. The loader opens the same way.
 - **The pergola in six configurations.** Standard, double, modular and the three wall-mounted versions, using the catalogue's product renders, next to the real specs.
 - **Product viewer.** Every product card opens a gallery with its installation photos, the technical render, and the specs from the catalogue (sizes, glass, motors, fabric, warranties), plus a button that loads that product into the quote builder.
 - **Side closures, certificates, 20 years.** A photo grid of ZIP screens, guillotine and sliding glass and aluminium panels. Certificate cards styled after Loni's TÜV documents. A giant "20" filled with photos of their projects, as in their anniversary post.
@@ -19,6 +19,7 @@ A fast, single-page site with no build step and no dependencies. It is in **Alba
 
 - Accessibility: 0 violations in an axe-core audit (WCAG 2.1 A/AA and best practices), in both languages, on desktop and mobile. Keyboard friendly, and motion switches off for people who ask their device for reduced motion.
 - Lighthouse (local server): desktop 99 performance / 100 accessibility / 100 best practices / 100 SEO; mobile 75 / 100 / 100 / 100. On GitHub Pages mobile scores higher, since files are served compressed.
+- Checked at 1920, 1440, 1280, 1024, 768, 390 and 360 px in both languages: no sideways scrolling, no clipped text, no console errors. HTML validated with html-validate.
 - Photos are WebP in two sizes (960 px and full) with `srcset`, and load lazily. Background photos load only when they come near the screen.
 - `HomeAndConstructionBusiness` structured data with certificates and social profiles, Open Graph image `assets/og.jpg`, `robots.txt`, `sitemap.xml`, `site.webmanifest`, app icons and a branded `404.html`.
 
@@ -58,6 +59,17 @@ for f in sys.argv[1:]:
 ```
 
 ## Before going live
+
+Please confirm with Loni:
+
+- **"E bërë për jetën jashtë"** is our Albanian take on their "Made for outdoor living". Approve it or give their preferred line.
+- **Aluminium 6065**: the catalogue says 6065; architectural profiles are usually 6063. Check for a typo.
+- **Partners strip** (SOMFY, BECKER, SATTLER, SAMSUNG LED): fine as brands used; check they're happy to show them.
+- **"Ofertë pa detyrim"** (no-obligation quote) and on-site measuring: is measuring free?
+- **"Our own team"** for installation: no subcontractors?
+- Frame colours (RAL 8019, wood effect) and the four fabric colours offered in the quote builder.
+
+Still to add:
 
 - **Factory and team photos.** The site has a place for them (`story.factory`, `story.team`). Add the photos from the "20 vite me ju" post.
 - **Photos for the remaining awnings** (cassette, classic, window, double, parasols): add `photos` to those products and they get their own cards.

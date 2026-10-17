@@ -37,8 +37,7 @@ window.LONI = {
   hero: [
     { src: "assets/img/bioklimatike.webp",  sq: "Pergola bioklimatike", en: "Bioclimatic pergola" },
     { src: "assets/img/mbuloje-xhami.webp", sq: "Mbulojë xhami",        en: "Glass roof" },
-    { src: "assets/img/gijotine-1.webp",    sq: "Xhama gijotinë",       en: "Guillotine glass" },
-    { src: "assets/img/slide-3.webp",       sq: "Xhama slide",          en: "Sliding glass" }
+    // Add more once there are photos at least 1600 px wide; smaller ones look soft full-screen.
   ],
 
   // The featured product: its configurations, each with a render.
@@ -76,7 +75,7 @@ window.LONI = {
     { code: "ISO 14001:2015", issuer: "TÜV AUSTRIA", sq: "Sistemi i menaxhimit mjedisor",                en: "Environmental management system" },
     { code: "ISO 45001:2018", issuer: "TÜV AUSTRIA", sq: "Shëndeti dhe siguria në punë",                 en: "Occupational health and safety" },
     { code: "FPC 2+",         issuer: "Inspecco",    sq: "Kontrolli i prodhimit në fabrikë, sistemi 2+", en: "Factory production control, system 2+" },
-    { code: "CE",             issuer: "EU",          sq: "Deklarata konformiteti për pergolat dhe sistemet e xhamit", en: "Declarations of conformity for pergolas and glazing" }
+    { code: "CE",             issuer: "LONI",        sq: "Shenja CE, me deklarata konformiteti për pergolat dhe sistemet e xhamit", en: "CE marking, with declarations of conformity for pergolas and glazing" }
   ],
 
   categories: {
@@ -100,7 +99,7 @@ window.LONI = {
         [{ sq: "Lamelat", en: "Louvres" }, { sq: "Rrotullohen me telekomandë", en: "Turn by remote" }],
         [{ sq: "Motori", en: "Motor" }, "SOMFY / BECKER"],
         [{ sq: "Ndriçimi", en: "Lighting" }, "LED"],
-        [{ sq: "Konfigurime", en: "Configurations" }, { sq: "Standard, dyshe, modulare, e varur", en: "Standard, double, modular, wall-mounted" }]
+        [{ sq: "Konfigurimet", en: "Configurations" }, { sq: "Standard, dyshe, modulare, e varur", en: "Standard, double, modular, wall-mounted" }]
       ],
       w: [2, 7, 4], dpt: [2, 6, 3], drives: ["somfy", "becker"], extras: ["led", "rain", "wind", "side", "glass", "heater"] },
 
@@ -121,31 +120,31 @@ window.LONI = {
 
     { id: "gijot", cat: "glass", plan: "gijot",
       photos: ["assets/img/gijotine-1.webp", "assets/img/gijotine-2.webp", "assets/img/gijotine-render.webp"],
-      sq: "Xhama gijotinë Premium", en: "Guillotine glass Premium",
+      sq: "Xhama gijotinë Premium", en: "Premium guillotine glass",
       d: { sq: "Sistem tërësisht prej alumini, me profile të trasha, që lëviz lart e poshtë me telekomandë. Izolon, i reziston motit dhe i jep ambientit ndjesinë e luksit.",
            en: "An all-aluminium system with heavy profiles that moves up and down by remote. It insulates, stands up to the weather and gives the space a sense of luxury." },
       specs: [
         [{ sq: "Përmasat", en: "Size" }, "max 400 × 400 cm"],
         [{ sq: "Xhami", en: "Glass" }, { sq: "4+4 sigurie / 4+14+4 termopan", en: "4+4 safety / 4+14+4 double glazing" }],
-        [{ sq: "Motori", en: "Motor" }, "BECKER, made in Germany"],
+        [{ sq: "Motori", en: "Motor" }, { sq: "BECKER, prodhim gjerman", en: "BECKER, made in Germany" }],
         [{ sq: "Operimi", en: "Operation" }, { sq: "Automatik, me telekomandë", en: "Automatic, by remote" }],
         [{ sq: "Struktura", en: "Structure" }, { sq: "Alumin 6065, RAL 7016", en: "6065 aluminium, RAL 7016" }]
       ],
-      w: [2, 4, 3.5], dpt: [1.5, 4, 2.4], h: true, drives: ["becker", "somfy"], extras: ["led"] },
+      w: [2, 4, 3.5], dpt: [1.5, 4, 2.4], h: true, drives: ["becker"], extras: ["led"] },
 
     { id: "slide", cat: "glass", plan: "slide",
       photos: ["assets/img/slide-1.webp", "assets/img/slide-2.webp", "assets/img/slide-3.webp", "assets/img/slide-4.webp", "assets/img/slide-render.webp"],
-      sq: "Xhama slide Premium", en: "Sliding glass Premium",
+      sq: "Xhama slide Premium", en: "Premium sliding glass",
       d: { sq: "Xhama rrëshqitës me profile të shumëfishta që izolojnë. Doreza elegante me kyç, lëvizje e qetë mbi rrota alumini: për shtëpi, restorante dhe terasa të nivelit të lartë.",
            en: "Sliding glass with multi-chamber profiles that insulate. Elegant handles with a key lock and smooth travel on aluminium wheels: for homes, restaurants and high-end terraces." },
       specs: [
         [{ sq: "Përmasat", en: "Size" }, "max 400 × 300 cm"],
         [{ sq: "Xhami", en: "Glass" }, { sq: "4+4 sigurie / termopan 22 mm", en: "4+4 safety / 22 mm double glazing" }],
         [{ sq: "Dorezat", en: "Handles" }, { sq: "Me kyçje me çelës", en: "With key lock" }],
-        [{ sq: "Shinat", en: "Tracks" }, { sq: "Rrota alumini", en: "Aluminium wheels" }],
+        [{ sq: "Lëvizja", en: "Travel" }, { sq: "Mbi rrota alumini", en: "On aluminium wheels" }],
         [{ sq: "Struktura", en: "Structure" }, { sq: "Alumin 6065, RAL 7016", en: "6065 aluminium, RAL 7016" }]
       ],
-      w: [2, 10, 4], dpt: [1.8, 3, 2.2], h: true, drives: [], extras: [] },
+      w: [1.5, 4, 3], dpt: [1.8, 3, 2.2], h: true, drives: [], extras: [] },
 
     { id: "zip", cat: "awning", plan: "screen", fabric: true,
       photos: ["assets/img/zip-3.webp", "assets/img/zip-1.webp", "assets/img/zip-2.webp", "assets/img/zip-4.webp", "assets/img/zip-render.webp"],
@@ -155,8 +154,8 @@ window.LONI = {
       specs: [
         [{ sq: "Përmasat", en: "Size" }, "max 500 × 350 cm"],
         [{ sq: "Shtofi", en: "Fabric" }, "Sattler"],
-        [{ sq: "Mbron nga", en: "Keeps out" }, { sq: "Dielli, era, insektet; privatësi", en: "Sun, wind, insects; privacy" }],
-        [{ sq: "Opsionale", en: "Optional" }, { sq: "Sensor ere", en: "Wind sensor" }],
+        [{ sq: "Mbrojtja", en: "Protection" }, { sq: "Nga dielli, era dhe insektet; jep privatësi", en: "Sun, wind and insects; adds privacy" }],
+        [{ sq: "Me kërkesë", en: "Optional" }, { sq: "Sensor ere", en: "Wind sensor" }],
         [{ sq: "Garancioni", en: "Warranty" }, { sq: "2 vite sistemi, 5 vite shtofi", en: "2 years system, 5 years fabric" }]
       ],
       w: [1, 5, 3], dpt: [1.5, 3.5, 2.5], h: true, drives: ["somfy", "becker"], extras: ["wind"] },
@@ -164,20 +163,20 @@ window.LONI = {
     { id: "mbixham", cat: "awning", plan: "glassroof", fabric: true,
       photos: ["assets/img/tenda-mbi-xham-render.webp"],
       sq: "Tenda mbi xham", en: "Glass-roof awning",
-      d: { sq: "Hijezim modern për çati xhami apo tavane të hapura, montuar sipër ose nën xham. Kontrollohet lehtë me telekomandë, zgjat shumë dhe kërkon pak mirëmbajtje.",
+      d: { sq: "Hijezim modern për çati xhami apo tavane të hapura, e montuar sipër ose nën xham. Kontrollohet lehtë me telekomandë, zgjat shumë dhe kërkon pak mirëmbajtje.",
            en: "Modern shading for glass roofs or open ceilings, mounted above or below the glass. Easy to run by remote, long-lasting and low-maintenance." },
       specs: [
         [{ sq: "Shtofi", en: "Fabric" }, "Sattler"],
         [{ sq: "Operimi", en: "Operation" }, { sq: "Manual / automatik", en: "Manual / automatic" }],
         [{ sq: "Montimi", en: "Mounting" }, { sq: "Sipër ose nën xham", en: "Above or below the glass" }],
-        [{ sq: "Opsionale", en: "Optional" }, { sq: "Motor, sensor ere", en: "Motor, wind sensor" }],
+        [{ sq: "Me kërkesë", en: "Optional" }, { sq: "Motor, sensor ere", en: "Motor, wind sensor" }],
         [{ sq: "Garancioni", en: "Warranty" }, { sq: "2 vite sistemi, 5 vite shtofi", en: "2 years system, 5 years fabric" }]
       ],
       w: [2, 7, 4], dpt: [2, 6, 3.5], drives: ["manual", "somfy", "becker"], extras: ["wind", "sun"] },
 
     { id: "kaseta", cat: "awning", plan: "awning", fabric: true,
       sq: "Tenda me kasetë", en: "Cassette awning",
-      d: { sq: "Pëlhura dhe krahët mbyllen plotësisht brenda një kasete alumini, të mbrojtura nga shiu dhe pluhuri.",
+      d: { sq: "Shtofi dhe krahët mbyllen plotësisht brenda një kasete alumini, ku mbrohen nga shiu dhe pluhuri.",
            en: "The fabric and arms fold fully into an aluminium cassette, protected from rain and dust." },
       w: [2, 7, 4], dpt: [1.5, 4, 3], drives: ["manual", "somfy", "becker"], extras: ["led", "wind", "sun"] },
 

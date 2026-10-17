@@ -98,8 +98,11 @@
     $$(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
     $$(".hero__title .line").forEach((l) => (l.innerHTML = `<span>${l.innerHTML}</span>`));
     $$(".js-years").forEach((el) => (el.textContent = C.years));
+    document.title = t("title");
+    $('meta[name="description"]').setAttribute("content", t("desc"));
     splitManifesto();
     renderAll();
+    if (!$("#formError").hidden) validate();
   }
 
   function renderAll() {
@@ -156,6 +159,8 @@
     entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); } });
   }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }) : null;
   const observe = (root = document) => $$(".reveal:not(.is-in)", root).forEach((el) => (io ? io.observe(el) : el.classList.add("is-in")));
+  // Lists are rebuilt when the language changes; after the first build their items are already revealed.
+  const shown = (el) => { const was = el.dataset.built === "1"; el.dataset.built = "1"; return was ? " is-in" : ""; };
 
   /* ======================================================================
      Manifesto: words light up as you read
@@ -198,6 +203,10 @@
   function renderHeroNav() {
     const nav = $("#heroNav");
     if (!slides.length) { $(".hero__foot").hidden = true; return; }
+    if (nav.children.length) {
+      $$(".slides__item", nav).forEach((b, i) => { b.setAttribute("aria-label", local(slides[i])); $("span", b).textContent = local(slides[i]); });
+      return;
+    }
     nav.innerHTML = slides.map((s, i) =>
       `<button type="button" class="slides__item" data-slide="${i}" aria-pressed="${i === current}" aria-label="${esc(local(s))}"><i><b></b></i><span aria-hidden="true">${esc(local(s))}</span></button>`).join("");
     restartBar();
@@ -256,8 +265,8 @@
     $("#heroPrev").addEventListener("click", () => show(current - 1));
     $("#heroNext").addEventListener("click", () => show(current + 1));
     const hero = $(".hero");
-    hero.addEventListener("focusin", () => pause(true));
-    hero.addEventListener("focusout", () => pause(false));
+    hero.addEventListener("focusin", (e) => { if (e.target.matches(":focus-visible")) pause(true); });
+    hero.addEventListener("focusout", () => { if (paused) pause(false); });
     document.addEventListener("visibilitychange", () => pause(document.hidden));
     let sx = null;
     heroMedia.parentElement.addEventListener("touchstart", (e) => (sx = e.touches[0].clientX), { passive: true });
@@ -309,12 +318,13 @@
   function renderCatalog() {
     // The first card spans two columns; a card left alone on the last row spans all three.
     const lonely = (withPhotos.length + 1) % 3 === 1;
+    const rv = shown($("#catalog"));
     $("#catalog").innerHTML = withPhotos.map((p, i) => {
       const src = p.photos[0];
       const n = p.photos.length;
       const keys = (p.specs || []).slice(0, 2).map(([k, v]) => `<li><span>${esc(local(k))}</span>${esc(local(v))}</li>`).join("");
       return `
-      <li class="card reveal${i === 0 ? " card--wide" : ""}${lonely && i === withPhotos.length - 1 ? " card--wide card--full" : ""}">
+      <li class="card reveal${rv}${i === 0 ? " card--wide" : ""}${lonely && i === withPhotos.length - 1 ? " card--wide card--full" : ""}">
         <button type="button" class="card__media${isRender(src) ? " card__media--render" : ""}" data-gallery="${p.id}" aria-label="${esc(local(p))}: ${n} ${esc(t("photos"))}">
           ${img(src, "", i === 0 || (lonely && i === withPhotos.length - 1) ? "(max-width: 960px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw")}
           <span class="card__count">${ICON.photos}${n}</span>
@@ -398,8 +408,9 @@
   function renderClosures() {
     const list = (C.closures || []).filter((c) => c.img);
     $("#closures").hidden = !list.length;
+    const rv = shown($("#closureGrid"));
     $("#closureGrid").innerHTML = list.map((c, i) => `
-      <li class="tile reveal" style="transition-delay:${i * 70}ms">
+      <li class="tile reveal${rv}" style="transition-delay:${i * 70}ms">
         ${img(c.img, local(c), i === 0 ? "(max-width: 640px) 100vw, 40vw" : "(max-width: 640px) 100vw, 33vw")}
         <div class="tile__cap"><span class="tile__n">${String(i + 1).padStart(2, "0")}</span><h3>${esc(local(c))}</h3>
           ${c.product ? `<button type="button" class="tile__link" data-gallery="${c.product}">${esc(t("details"))}${ICON.arrow}</button>` : ""}</div>
@@ -408,8 +419,9 @@
   }
 
   function renderCerts() {
+    const rv = shown($("#certs"));
     $("#certs").innerHTML = (C.certificates || []).map((c, i) => `
-      <li class="cert reveal" style="transition-delay:${i * 60}ms">
+      <li class="cert reveal${rv}" style="transition-delay:${i * 60}ms">
         <span class="cert__issuer">${esc(c.issuer)}</span>
         <b class="cert__code">${esc(c.code)}</b>
         <span class="cert__label">${esc(local(c))}</span>
@@ -499,6 +511,7 @@
   function sizeText() {
     const p = prod();
     const d = p.square ? offer.w : offer.d;
+    if (p.h) return `${offer.w.toFixed(2)} m ${t("wide")} × ${d.toFixed(2)} m ${t("tall")}`;
     return `${offer.w.toFixed(2)} × ${d.toFixed(2)} m`;
   }
   function colorText() {
@@ -558,9 +571,11 @@
     else $$("button", b.parentElement).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     renderSheet();
   });
-  $("#dimW").addEventListener("input", (e) => { offer.w = +e.target.value; renderSheet(); });
-  $("#dimD").addEventListener("input", (e) => { offer.d = +e.target.value; renderSheet(); });
-  ["#fName", "#fPlace"].forEach((id) => $(id).addEventListener("input", renderSheet));
+  const unstamp = () => $("#sStamp").classList.remove("is-on");
+  $("#dimW").addEventListener("input", (e) => { offer.w = +e.target.value; unstamp(); renderSheet(); });
+  $("#dimD").addEventListener("input", (e) => { offer.d = +e.target.value; unstamp(); renderSheet(); });
+  ["#fName", "#fPlace"].forEach((id) => $(id).addEventListener("input", () => { unstamp(); renderSheet(); }));
+  ["#fPhone", "#fNote"].forEach((id) => $(id).addEventListener("input", unstamp));
 
   function message() {
     const p = prod();

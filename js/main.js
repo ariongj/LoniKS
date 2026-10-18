@@ -188,7 +188,8 @@
   const heroMedia = $("#heroMedia"), heroImg = $("#heroImg"), heroSlats = $("#heroSlats");
   const sizes = {};
   let current = 0, busy = false, timer = 0, paused = false;
-  const SLIDE_MS = 7000;
+  const SLIDE_MS = 4500;          // time each photo stays; the progress bar and zoom follow it
+  const SLAT_MS = 700, SLAT_STAGGER = 35;
 
   function loadSize(src) {
     if (sizes[src]) return Promise.resolve(sizes[src]);
@@ -238,10 +239,10 @@
       const s = Math.max(W / w, H / h), bw = w * s, bh = h * s, ox = (W - bw) / 2, oy = (H - bh) / 2;
       heroSlats.innerHTML = Array.from({ length: n }, (_, i) => {
         const top = Math.floor((H / n) * i), hh = Math.ceil(H / n) + 1;
-        return `<i style="top:${top}px;height:${hh}px;background-image:url('${src}');background-size:${bw}px ${bh}px;background-position:${ox}px ${oy - top}px;animation-delay:${i * 55}ms"></i>`;
+        return `<i style="top:${top}px;height:${hh}px;background-image:url('${src}');background-size:${bw}px ${bh}px;background-position:${ox}px ${oy - top}px;animation-delay:${i * SLAT_STAGGER}ms"></i>`;
       }).join("");
       heroSlats.classList.add("is-on");
-      await new Promise((r) => setTimeout(r, 1000 + n * 55));
+      await new Promise((r) => setTimeout(r, SLAT_MS + n * SLAT_STAGGER));
       heroImg.style.backgroundImage = `url("${src}")`;
       heroImg.classList.remove("is-zoom"); void heroImg.offsetWidth; heroImg.classList.add("is-zoom");
       heroSlats.classList.remove("is-on");
@@ -261,6 +262,8 @@
   function pause(p) { paused = p; restartBar(); schedule(); }
 
   if (slides.length) {
+    $(".hero").style.setProperty("--slide", `${SLIDE_MS}ms`);
+    $(".hero").style.setProperty("--slat", `${SLAT_MS}ms`);
     $("#heroNav").addEventListener("click", (e) => { const b = e.target.closest("[data-slide]"); if (b) show(+b.dataset.slide); });
     $("#heroPrev").addEventListener("click", () => show(current - 1));
     $("#heroNext").addEventListener("click", () => show(current + 1));

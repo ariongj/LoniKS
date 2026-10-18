@@ -199,14 +199,14 @@ legend { padding: 0; }
 .hero { position: relative; min-height: 100vh; min-height: 100svh; overflow: hidden; background: var(--black); isolation: isolate; display: flex; }
 .hero__media { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
 .hero__img { position: absolute; inset: 0; background: center / cover no-repeat; }
-.hero__img.is-zoom { animation: drift 9s linear both; }
+.hero__img.is-zoom { animation: drift calc(var(--slide, 4.5s) + 1.5s) linear both; }
 @keyframes drift { from { transform: scale(1); } to { transform: scale(1.06); } }
 .hero__slats { position: absolute; inset: 0; perspective: 1800px; pointer-events: none; }
 .hero__slats i {
   position: absolute; left: 0; right: 0; display: block; background-repeat: no-repeat;
   transform-origin: center; transform: rotateX(-88deg); opacity: .2; backface-visibility: hidden;
 }
-.hero__slats.is-on i { animation: louvre 1s var(--ease-io) both; }
+.hero__slats.is-on i { animation: louvre var(--slat, .7s) var(--ease-io) both; }
 @keyframes louvre {
   0% { transform: rotateX(-88deg); opacity: .2; filter: brightness(.4); }
   70% { filter: brightness(1.12); }
@@ -245,7 +245,7 @@ legend { padding: 0; }
 .slides__item b { display: block; height: 100%; background: #fff; transform: scaleX(0); transform-origin: left; }
 .slides__item[aria-pressed="true"] { color: #fff; }
 .slides__item[aria-pressed="true"] b { transform: scaleX(1); }
-.slides__item.is-run b { transform: scaleX(0); animation: bar 7s linear forwards; }
+.slides__item.is-run b { transform: scaleX(0); animation: bar var(--slide, 4.5s) linear forwards; }
 @keyframes bar { to { transform: scaleX(1); } }
 .slides__item:hover { color: #fff; }
 .hero__ctrl { display: flex; gap: 10px; }

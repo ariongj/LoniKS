@@ -22,9 +22,8 @@
   <link rel="apple-touch-icon" href="assets/icon-180.png" />
   <link rel="manifest" href="site.webmanifest" />
   <link rel="preload" as="image" href="assets/img/bioklimatike.webp" imagesrcset="assets/img/bioklimatike-960.webp 960w, assets/img/bioklimatike.webp 1800w" imagesizes="100vw" fetchpriority="high" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,800;0,900;1,900&family=IBM+Plex+Mono:wght@500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/archivo-normal-1.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/manrope-normal-0.woff2" crossorigin />
   <link rel="stylesheet" href="css/styles.css" />
   <script type="application/ld+json">
   {
@@ -144,26 +143,35 @@
       <div class="container intro__grid">
         <p class="kicker reveal"><span class="kicker__n">00</span><span>Loni tenda</span></p>
         <p class="manifesto" id="manifesto" data-i18n="intro.text">Për më shumë se 20 vite projektojmë, prodhojmë dhe montojmë hijen e terasave, shtëpive, restoranteve dhe lokaleve. Alumin i ekstruduar dhe i ngjyrosur me pluhur në fabrikë, xham sigurie, shtof Sattler dhe motorë SOMFY e BECKER. Ju zgjidhni si të duket hapësira, ne kujdesemi që të zgjasë.</p>
-        <ul class="partners reveal" id="partners"></ul>
+        <ul class="materials" id="materials"></ul>
       </div>
     </section>
 
     <!-- Featured: bioclimatic pergola configurations -->
     <section class="feature" id="feature" aria-labelledby="featureTitle">
       <div class="container feature__grid">
-        <div class="feature__copy">
+        <div class="feature__head">
           <p class="kicker reveal"><span class="kicker__n">01</span><span id="featureKicker">Skylux Dual</span></p>
           <h2 id="featureTitle" class="h2 reveal" data-i18n-html="feature.title">Pergola <em>bioklimatike</em></h2>
-          <p class="lead reveal" data-i18n="feature.lead">Lamelat e aluminit rrotullohen me një prekje: hapi për ajër dhe dritë, mbylli për hije dhe shi. Me LED të integruar dhe motorë SOMFY ose BECKER, në gjashtë konfigurime.</p>
+          <p class="lead reveal" data-i18n="feature.lead">Lamelat e aluminit rrotullohen me një prekje: hapini për ajër dhe dritë, mbyllini për hije dhe shi. Me LED të integruar dhe motorë SOMFY ose BECKER, në gjashtë konfigurime.</p>
+        </div>
+        <div class="configs reveal">
+          <div class="configs__stage">
+            <div class="configs__imgs" id="configStage" aria-live="polite"></div>
+            <span class="configs__label" id="configLabel"></span>
+            <div class="configs__nav">
+              <button type="button" class="round" id="configPrev" data-i18n-attr="aria-label:prev" aria-label="E mëparshmja"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+              <button type="button" class="round" id="configNext" data-i18n-attr="aria-label:next" aria-label="Tjetra"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            </div>
+          </div>
+          <div class="configs__tabs" id="configTabs" role="group" data-i18n-attr="aria-label:feature.configs" aria-label="Konfigurimet"></div>
+        </div>
+        <div class="feature__details">
           <dl class="specs reveal" id="featureSpecs"></dl>
           <div class="feature__actions reveal">
             <button type="button" class="btn btn--red btn--lg" data-quote="pergola"><span data-i18n="cta.offerThis">Kërko ofertë për këtë</span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
             <button type="button" class="btn btn--line btn--lg" data-gallery="pergola" data-i18n="cta.photos">Shiko fotot</button>
           </div>
-        </div>
-        <div class="configs reveal">
-          <div class="configs__stage" id="configStage" aria-live="polite"></div>
-          <div class="configs__tabs" id="configTabs" role="group" data-i18n-attr="aria-label:feature.configs" aria-label="Konfigurimet"></div>
         </div>
       </div>
     </section>
@@ -179,10 +187,6 @@
           <p class="section-head__lead reveal" data-i18n="products.lead">Çdo sistem prodhohet me porosi, sipas përmasave të hapësirës suaj. Klikoni një produkt për fotot dhe të dhënat teknike.</p>
         </div>
         <ul class="catalog" id="catalog"></ul>
-        <div class="more reveal">
-          <h3 class="more__title" data-i18n="products.more">Edhe tenda &amp; çadra</h3>
-          <ul class="more__list" id="moreList"></ul>
-        </div>
       </div>
     </section>
 

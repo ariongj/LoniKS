@@ -55,6 +55,18 @@
     }
   };
 
+  // Horizontal swipe on touch screens: calls back with +1 (next) or -1 (previous).
+  function swipe(el, fn) {
+    let x = null, y = 0;
+    el.addEventListener("touchstart", (e) => { x = e.touches[0].clientX; y = e.touches[0].clientY; }, { passive: true });
+    el.addEventListener("touchend", (e) => {
+      if (x === null) return;
+      const dx = e.changedTouches[0].clientX - x, dy = e.changedTouches[0].clientY - y;
+      x = null;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) fn(dx < 0 ? 1 : -1);
+    });
+  }
+
   // Background photos load only once they come near the screen.
   const bgQueue = new Map();
   const bgIO = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
@@ -107,6 +119,7 @@
 
   function renderAll() {
     renderHeroNav();
+    renderMaterials();
     renderFeature();
     renderCatalog();
     renderClosures();
@@ -271,20 +284,30 @@
     hero.addEventListener("focusin", (e) => { if (e.target.matches(":focus-visible")) pause(true); });
     hero.addEventListener("focusout", () => { if (paused) pause(false); });
     document.addEventListener("visibilitychange", () => pause(document.hidden));
-    let sx = null;
-    heroMedia.parentElement.addEventListener("touchstart", (e) => (sx = e.touches[0].clientX), { passive: true });
-    heroMedia.parentElement.addEventListener("touchend", (e) => {
-      if (sx === null) return;
-      const dx = e.changedTouches[0].clientX - sx;
-      if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
-      sx = null;
-    });
+    swipe(hero, (dir) => show(current + dir));
   } else $(".hero").classList.add("is-empty");
 
   /* ======================================================================
-     Partners, feature
+     Materials, feature
      ====================================================================== */
-  $("#partners").innerHTML = (C.partners || []).map((p) => `<li>${esc(p)}</li>`).join("");
+  const MATERIAL_ICON = {
+    alu: '<path d="M8 8h32v8H26v24h-4V16H8z"/><path d="M14 8v8M34 8v8"/>',
+    glass: '<path d="M12 6h18l6 6v30H18l-6-6z"/><path d="M18 12v30M12 6l6 6h18"/>',
+    fabric: '<circle cx="12" cy="14" r="5"/><path d="M12 9h26v24c0 3-2 5-5 5s-4-3-7-3-4 3-7 3-4-3-7-3V19"/>',
+    motor: '<rect x="15" y="5" width="18" height="38" rx="8"/><path d="m20 17 4-4 4 4M20 31l4 4 4-4"/><circle cx="24" cy="24" r="2.2"/>'
+  };
+  function renderMaterials() {
+    const list = C.materials || [];
+    const rv = shown($("#materials"));
+    $("#materials").hidden = !list.length;
+    $("#materials").innerHTML = list.map((m, i) => `
+      <li class="material reveal${rv}" style="transition-delay:${i * 70}ms">
+        <svg class="material__i" viewBox="0 0 48 48" aria-hidden="true">${MATERIAL_ICON[m.icon] || ""}</svg>
+        <p class="material__t">${esc(local(m))}</p>
+        <p class="material__d">${esc(local(m.d))}</p>
+      </li>`).join("");
+    observe($("#materials"));
+  }
 
   let configIndex = 0;
   const specList = (specs) => (specs || []).map(([k, v]) => `<div><dt>${esc(local(k))}</dt><dd>${esc(local(v))}</dd></div>`).join("");
@@ -300,36 +323,39 @@
     const stage = $("#configStage");
     if (!stage.children.length) {
       stage.innerHTML = configs.map((c, i) =>
-        img(c.img, "", "(max-width: 1080px) 100vw, 60vw", `class="${i === configIndex ? "is-on" : ""}"`)).join("") +
-        `<span class="configs__label" id="configLabel"></span>`;
+        img(c.img, "", "(max-width: 1080px) 100vw, 60vw", `class="${i === configIndex ? "is-on" : ""}"`)).join("");
     }
     $$("img", stage).forEach((im, i) => im.setAttribute("alt", `${local(p)} · ${local(configs[i])}`));
     $("#configLabel").textContent = `${String(configIndex + 1).padStart(2, "0")} / ${String(configs.length).padStart(2, "0")} · ${local(configs[configIndex] || {})}`;
   }
+  function showConfig(i) {
+    const n = (C.featured.configs || []).length;
+    if (!n) return;
+    configIndex = (i + n) % n;
+    $$("#configStage img").forEach((im, j) => im.classList.toggle("is-on", j === configIndex));
+    renderFeature();
+  }
   $("#configTabs").addEventListener("click", (e) => {
     const b = e.target.closest("[data-config]");
-    if (!b) return;
-    configIndex = +b.dataset.config;
-    $$("#configTabs button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    $$("#configStage img").forEach((im, i) => im.classList.toggle("is-on", i === configIndex));
-    renderFeature();
+    if (b) showConfig(+b.dataset.config);
   });
+  $("#configPrev").addEventListener("click", () => showConfig(configIndex - 1));
+  $("#configNext").addEventListener("click", () => showConfig(configIndex + 1));
+  swipe($(".configs__stage"), (dir) => showConfig(configIndex + dir));
 
   /* ======================================================================
      Products
      ====================================================================== */
   function renderCatalog() {
-    // The first card spans two columns; a card left alone on the last row spans all three.
-    const lonely = (withPhotos.length + 1) % 3 === 1;
     const rv = shown($("#catalog"));
-    $("#catalog").innerHTML = withPhotos.map((p, i) => {
+    const cards = withPhotos.map((p, i) => {
       const src = p.photos[0];
       const n = p.photos.length;
       const keys = (p.specs || []).slice(0, 2).map(([k, v]) => `<li><span>${esc(local(k))}</span>${esc(local(v))}</li>`).join("");
       return `
-      <li class="card reveal${rv}${i === 0 ? " card--wide" : ""}${lonely && i === withPhotos.length - 1 ? " card--wide card--full" : ""}">
+      <li class="card reveal${rv}${i === 0 ? " card--wide" : ""}">
         <button type="button" class="card__media${isRender(src) ? " card__media--render" : ""}" data-gallery="${p.id}" aria-label="${esc(local(p))}: ${n} ${esc(t("photos"))}">
-          ${img(src, "", i === 0 || (lonely && i === withPhotos.length - 1) ? "(max-width: 960px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw")}
+          ${img(src, "", i === 0 ? "(max-width: 960px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw")}
           <span class="card__count">${ICON.photos}${n}</span>
         </button>
         <div class="card__body">
@@ -344,11 +370,23 @@
         </div>
       </li>`;
     }).join("");
-    $("#moreList").innerHTML = C.products.filter((p) => !(p.photos || []).length).map((p) => `
-      <li>
-        <div><h4>${esc(local(p))}</h4><p>${esc(local(p.d))}</p></div>
-        <button type="button" class="card__cta" data-quote="${p.id}">${esc(t("request"))}${ICON.arrow}</button>
-      </li>`).join("");
+    // Products without photos sit in one panel that fills what's left of the last row
+    // (the first card takes two cells of the three- and two-column grids).
+    const rest = C.products.filter((p) => !(p.photos || []).length);
+    const n = withPhotos.length;
+    const span3 = 3 - ((n + 1) % 3 || 3) || 3, span2 = (n - 1) % 2 ? 1 : 2;
+    const panel = !rest.length ? "" : `
+      <li class="card card--list reveal${rv}" style="--span3:${span3};--span2:${span2}">
+        <h3 class="card__title">${esc(t("more"))}</h3>
+        <p class="card__text">${esc(t("moreLead"))}</p>
+        <ul class="more__list">${rest.map((p) => `
+          <li>
+            <div><h4>${esc(local(p))}</h4><p>${esc(local(p.d))}</p></div>
+            <button type="button" class="card__cta" data-quote="${p.id}" aria-label="${esc(t("request"))}: ${esc(local(p))}">${esc(t("request"))}${ICON.arrow}</button>
+          </li>`).join("")}
+        </ul>
+      </li>`;
+    $("#catalog").innerHTML = cards + panel;
     observe($("#catalog"));
   }
 
@@ -394,6 +432,7 @@
     box.innerHTML = `<img src="${esc(small(src))}" srcset="${esc(srcset(src))}" sizes="(max-width: 1080px) 100vw, 60vw" alt="${esc(local(vProduct))} · ${vIndex + 1}/${photos.length}" decoding="async" />`;
     $$("#viewerThumbs button").forEach((b, j) => b.setAttribute("aria-current", String(j === vIndex)));
   }
+  swipe($("#viewerImg"), (dir) => showPhoto(vIndex + dir));
   $("#viewerPrev").addEventListener("click", () => showPhoto(vIndex - 1));
   $("#viewerNext").addEventListener("click", () => showPhoto(vIndex + 1));
   $("#viewerThumbs").addEventListener("click", (e) => { const b = e.target.closest("[data-thumb]"); if (b) showPhoto(+b.dataset.thumb); });

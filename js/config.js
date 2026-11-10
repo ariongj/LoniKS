@@ -10,7 +10,13 @@ window.LONI = {
   name: "Loni Tenda",
   legalName: "N.T.SH. \"LONI\"",
   years: 20,                // shown as "+20 vite"
-  partners: ["SOMFY", "BECKER", "SATTLER", "SAMSUNG LED"],
+  // What everything is built from (from the 2026 catalogue). Shown under the intro.
+  materials: [
+    { icon: "alu",    sq: "Alumini",         en: "Aluminium",     d: { sq: "Profile të ekstruduara 6065, të ngjyrosura me pluhur në fabrikë. Standard në RAL 7016.", en: "Extruded 6065 profiles, powder-coated in the factory. RAL 7016 as standard." } },
+    { icon: "glass",  sq: "Xhami",           en: "Glass",         d: { sq: "Xham sigurie i laminuar 4+4 ose 5+5, ose termopan 4+14+4.", en: "Laminated safety glass, 4+4 or 5+5, or 4+14+4 double glazing." } },
+    { icon: "fabric", sq: "Shtofi",          en: "Fabric",        d: { sq: "Shtof Sattler për ZIP perdet dhe tendat, me 5 vite garanci.", en: "Sattler fabric for ZIP screens and awnings, with a 5-year warranty." } },
+    { icon: "motor",  sq: "Motorët & LED",   en: "Motors & LED",  d: { sq: "Motorë SOMFY dhe BECKER me telekomandë; ndriçim LED nga Samsung.", en: "SOMFY and BECKER motors with remote control; LED lighting by Samsung." } }
+  ],
 
   // Contact. Leave empty to hide. WhatsApp/Viber: digits only with country code, e.g. "38349206030".
   phones: ["+383 49 20 60 30", "+383 44 20 60 30"],
@@ -92,7 +98,7 @@ window.LONI = {
     { id: "pergola", cat: "pergola", plan: "louvres",
       photos: ["assets/img/bioklimatike.webp", "assets/img/pergola-dyshe.webp", "assets/img/pergola-modulare-e-varur.webp"],
       sq: "Pergola bioklimatike", en: "Bioclimatic pergola",
-      d: { sq: "Strukturë tërësisht prej alumini me ngjyrosje elektrostatike. Lamelat rrotullohen me telekomandë: hapi për ajër e dritë, mbylli për hije dhe shi.",
+      d: { sq: "Strukturë tërësisht prej alumini me ngjyrosje elektrostatike. Lamelat rrotullohen me telekomandë: hapini për ajër e dritë, mbyllini për hije dhe shi.",
            en: "A fully aluminium structure with electrostatic powder coating. The louvres turn by remote: open them for air and light, close them for shade and rain." },
       specs: [
         [{ sq: "Struktura", en: "Structure" }, { sq: "Alumin 6065, ngjyrosje me pluhur", en: "6065 aluminium, powder-coated" }],

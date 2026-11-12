@@ -19,7 +19,7 @@ A fast, single-page site with no build step and no dependencies. It is in **Alba
 ## Quality checks
 
 - Accessibility: 0 violations in an axe-core audit (WCAG 2.1 A/AA and best practices), in both languages, on desktop and mobile. Keyboard friendly, and motion switches off for people who ask their device for reduced motion.
-- Lighthouse (local server): desktop 99 performance / 100 accessibility / 100 best practices / 100 SEO; mobile 80 / 100 / 100 / 100. On GitHub Pages mobile scores higher, since files are served compressed.
+- Lighthouse (local server): desktop 99 performance / 100 accessibility / 100 best practices / 100 SEO; mobile 88 / 100 / 100 / 100 (three runs: 88, 90, 90). On GitHub Pages mobile may score higher, since files are served compressed.
 - Fonts (Archivo, Manrope, Instrument Serif, IBM Plex Mono; all SIL Open Font License) are served with the site from `assets/fonts/`, so nothing loads from another server except the Google Map.
 - Checked at 1920, 1440, 1280, 1024, 768, 390, 360 and 320 px in both languages: no sideways scrolling, no clipped or overlapping text, no console errors. HTML validated with html-validate.
 - Photos are WebP in two sizes (960 px and full) with `srcset`, and load lazily. Background photos load only when they come near the screen.

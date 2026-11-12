@@ -362,7 +362,7 @@ legend { padding: 0; }
 .card__more:hover { color: var(--black); }
 .card__more:hover .i { transform: rotate(90deg); }
 
-.more__list { display: grid; margin-top: 20px; border-top: 1px solid var(--line); }
+.more__list { flex: 1; display: grid; grid-auto-rows: 1fr; margin-top: 20px; border-top: 1px solid var(--line); }
 .more__list li { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--line); }
 .more__list li:last-child { border-bottom: 0; }
 .more__list h4 { font: 800 17px/1.15 var(--display); text-transform: uppercase; }

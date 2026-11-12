@@ -45,6 +45,7 @@
     clock: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     copy: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
     arrow: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    diag: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>',
     plus: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     photos: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>',
     social: {
@@ -110,11 +111,13 @@
     $$(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
     $$(".hero__title .line").forEach((l) => (l.innerHTML = `<span>${l.innerHTML}</span>`));
     $$(".js-years").forEach((el) => (el.textContent = C.years));
+    $$(".js-yplus").forEach((el) => (el.textContent = lang === "sq" ? `+${C.years}` : `${C.years}+`));
     document.title = t("title");
     $('meta[name="description"]').setAttribute("content", t("desc"));
     splitManifesto();
     renderAll();
-    if (!$("#formError").hidden) validate();
+    const err = $("#formError");
+    if (!err.hidden && err.dataset.key) err.textContent = t(err.dataset.key);
   }
 
   function renderAll() {
@@ -233,8 +236,10 @@
     });
   }
 
+  let queued = null;
   async function show(next) {
-    if (busy || !slides.length) return;
+    if (!slides.length) return;
+    if (busy) { queued = next; return; }
     next = (next + slides.length) % slides.length;
     if (next === current && heroImg.style.backgroundImage) return;
     busy = true;
@@ -266,6 +271,7 @@
     // preload the following photo
     if (slides.length > 1) loadSize(fit(slides[(current + 1) % slides.length].src));
     busy = false;
+    if (queued !== null) { const q = queued; queued = null; return show(q); }
     schedule();
   }
   function schedule() {
@@ -277,6 +283,8 @@
   if (slides.length) {
     $(".hero").style.setProperty("--slide", `${SLIDE_MS}ms`);
     $(".hero").style.setProperty("--slat", `${SLAT_MS}ms`);
+    // With one or two photos the tabs are enough; the arrows would only repeat them.
+    $(".hero__ctrl").hidden = slides.length < 3;
     $("#heroNav").addEventListener("click", (e) => { const b = e.target.closest("[data-slide]"); if (b) show(+b.dataset.slide); });
     $("#heroPrev").addEventListener("click", () => show(current - 1));
     $("#heroNext").addEventListener("click", () => show(current + 1));
@@ -313,19 +321,28 @@
   const specList = (specs) => (specs || []).map(([k, v]) => `<div><dt>${esc(local(k))}</dt><dd>${esc(local(v))}</dd></div>`).join("");
   function renderFeature() {
     const f = C.featured;
-    const p = C.products.find((x) => x.id === f.product);
-    if (!f || !p) { $("#feature").hidden = true; return; }
+    const p = f && C.products.find((x) => x.id === f.product);
+    if (!p) { $("#feature").hidden = true; return; }
     $("#featureKicker").textContent = f.name || local(p);
     $("#featureSpecs").innerHTML = specList(p.specs);
     const configs = f.configs || [];
-    $("#configTabs").innerHTML = configs.map((c, i) =>
-      `<button type="button" data-config="${i}" aria-pressed="${i === configIndex}">${esc(local(c))}</button>`).join("");
+    const tabs = $("#configTabs");
+    if (tabs.children.length !== configs.length) {
+      tabs.innerHTML = configs.map((_, i) => `<button type="button" data-config="${i}"></button>`).join("");
+    }
+    $$("button", tabs).forEach((b, i) => {
+      b.textContent = local(configs[i]);
+      b.setAttribute("aria-pressed", String(i === configIndex));
+    });
     const stage = $("#configStage");
     if (!stage.children.length) {
       stage.innerHTML = configs.map((c, i) =>
         img(c.img, "", "(max-width: 1080px) 100vw, 60vw", `class="${i === configIndex ? "is-on" : ""}"`)).join("");
     }
-    $$("img", stage).forEach((im, i) => im.setAttribute("alt", `${local(p)} · ${local(configs[i])}`));
+    $$("img", stage).forEach((im, i) => {
+      im.setAttribute("alt", `${local(p)} · ${local(configs[i])}`);
+      im.setAttribute("aria-hidden", String(i !== configIndex));
+    });
     $("#configLabel").textContent = `${String(configIndex + 1).padStart(2, "0")} / ${String(configs.length).padStart(2, "0")} · ${local(configs[configIndex] || {})}`;
   }
   function showConfig(i) {
@@ -334,6 +351,9 @@
     configIndex = (i + n) % n;
     $$("#configStage img").forEach((im, j) => im.classList.toggle("is-on", j === configIndex));
     renderFeature();
+    // keep the pressed tab in view when the row scrolls sideways (phones)
+    const tabs = $("#configTabs"), b = tabs.children[configIndex];
+    if (tabs.scrollWidth > tabs.clientWidth) tabs.scrollTo({ left: b.offsetLeft - 16, behavior: reduceMotion ? "auto" : "smooth" });
   }
   $("#configTabs").addEventListener("click", (e) => {
     const b = e.target.closest("[data-config]");
@@ -351,12 +371,13 @@
     const cards = withPhotos.map((p, i) => {
       const src = p.photos[0];
       const n = p.photos.length;
-      const keys = (p.specs || []).slice(0, 2).map(([k, v]) => `<li><span>${esc(local(k))}</span>${esc(local(v))}</li>`).join("");
+      // the wide first card has room for every spec; the others show the two most telling ones
+      const keys = (p.specs || []).slice(0, i === 0 ? 5 : 2).map(([k, v]) => `<li><span>${esc(local(k))}</span><b>${esc(local(v))}</b></li>`).join("");
       return `
       <li class="card reveal${rv}${i === 0 ? " card--wide" : ""}">
-        <button type="button" class="card__media${isRender(src) ? " card__media--render" : ""}" data-gallery="${p.id}" aria-label="${esc(local(p))}: ${n} ${esc(t("photos"))}">
+        <button type="button" class="card__media${isRender(src) ? " card__media--render" : ""}" data-gallery="${p.id}" aria-label="${esc(local(p))}: ${n} ${esc(t(n === 1 ? "photo" : "photos"))}">
           ${img(src, "", i === 0 ? "(max-width: 960px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw")}
-          <span class="card__count">${ICON.photos}${n}</span>
+          ${n > 1 ? `<span class="card__count">${ICON.photos}${n}</span>` : ""}
         </button>
         <div class="card__body">
           <p class="card__cat">${esc(local(C.categories[p.cat]))}</p>
@@ -374,9 +395,11 @@
     // (the first card takes two cells of the three- and two-column grids).
     const rest = C.products.filter((p) => !(p.photos || []).length);
     const n = withPhotos.length;
-    const span3 = 3 - ((n + 1) % 3 || 3) || 3, span2 = (n - 1) % 2 ? 1 : 2;
+    const span3 = 3 - ((n + 1) % 3 || 3) || 3;
+    // In two columns the panel takes a full row; the first card stays wide only if that leaves no gap.
+    $("#catalog").classList.toggle("catalog--pairs", n % 2 === 0);
     const panel = !rest.length ? "" : `
-      <li class="card card--list reveal${rv}" style="--span3:${span3};--span2:${span2}">
+      <li class="card card--list reveal${rv}" style="--span3:${span3}">
         <h3 class="card__title">${esc(t("more"))}</h3>
         <p class="card__text">${esc(t("moreLead"))}</p>
         <ul class="more__list">${rest.map((p) => `
@@ -393,6 +416,7 @@
   function quote(id) {
     selectProduct(id);
     $("#offer").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
+    $("#offerTitle").focus({ preventScroll: true });
   }
   document.addEventListener("click", (e) => {
     const q = e.target.closest("[data-quote]");
@@ -465,7 +489,7 @@
     $("#certs").innerHTML = (C.certificates || []).map((c, i) => `
       <li class="cert reveal${rv}" style="transition-delay:${i * 60}ms">
         <span class="cert__issuer">${esc(c.issuer)}</span>
-        <b class="cert__code">${esc(c.code)}</b>
+        <b class="cert__code">${esc(c.code).replace(/^ISO /, "<span>ISO</span> ")}</b>
         <span class="cert__label">${esc(local(c))}</span>
         <svg class="cert__seal" viewBox="0 0 48 48" aria-hidden="true"><use href="#badge"/></svg>
       </li>`).join("");
@@ -649,6 +673,7 @@
     name.setAttribute("aria-invalid", String(problem === "needName"));
     phone.setAttribute("aria-invalid", String(problem === "needPhone"));
     err.hidden = !problem;
+    err.dataset.key = problem;
     if (problem) {
       err.textContent = t(problem);
       (problem === "needName" ? name : phone).focus();
@@ -696,8 +721,8 @@
     const items = [];
     phones.forEach((p, i) => items.push(`<li><span class="contact__k">${ICON.phone}${i ? "" : esc(t("phone"))}</span><a href="${tel(p)}">${esc(nb(p))}</a></li>`));
     if (C.email) items.push(`<li><span class="contact__k">${ICON.mail}${esc(t("email"))}</span><a href="mailto:${esc(C.email)}">${esc(C.email)}</a></li>`);
-    if (waNumber) items.push(`<li><span class="contact__k">${ICON.wa}WhatsApp</span><a href="https://wa.me/${waNumber}" target="_blank" rel="noopener">+${esc(waNumber)} ↗</a></li>`);
-    if (place) items.push(`<li><span class="contact__k">${ICON.pin}${esc(t("address"))}</span><span>${esc([place, t("country")].join(", "))}<a class="contact__dir" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}" target="_blank" rel="noopener">${esc(t("directions"))} ↗</a></span></li>`);
+    if (waNumber) items.push(`<li><span class="contact__k">${ICON.wa}WhatsApp</span><a href="https://wa.me/${waNumber}" target="_blank" rel="noopener">+${esc(waNumber)}${ICON.diag}</a></li>`);
+    if (place) items.push(`<li><span class="contact__k">${ICON.pin}${esc(t("address"))}</span><span>${esc([place, t("country")].join(", "))}<a class="contact__dir" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}" target="_blank" rel="noopener">${esc(t("directions"))}${ICON.diag}</a></span></li>`);
     if (C.hours) {
       const order = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
       const rows = order.map((k, i) => {
@@ -780,7 +805,6 @@
   function ready() {
     if (lifted) return;
     lifted = true;
-    document.body.classList.remove("is-loading");
     $("#loader").classList.add("is-done");
   }
   const started = performance.now();

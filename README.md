@@ -8,9 +8,9 @@ A fast, single-page site with no build step and no dependencies. It is in **Alba
 
 ## What makes it different
 
-- **Photos that open like louvres.** The hero shows Loni's own installations (the two photos sharp enough for full screen; add more in `hero` once there are photos at least 1600 px wide). Each new photo is sliced into horizontal slats that turn open, the way a bioclimatic roof does. It plays on its own, can be swiped on phones, and pauses while you use it. The loader opens the same way.
+- **Photos that open like louvres.** The hero shows images from Loni's catalogue (the two sharp enough for full screen; add more in `hero` once there are photos at least 1600 px wide). Each new photo is sliced into horizontal slats that turn open, the way a bioclimatic roof does. It plays on its own and can be swiped on phones. The loader opens the same way.
 - **The pergola in six configurations.** Standard, double, modular and the three wall-mounted versions, using the catalogue's product renders on a studio backdrop, next to the real specs. Browse with the tabs, the arrows or a swipe.
-- **Product viewer.** Every product card opens a gallery with its installation photos, the technical render, and the specs from the catalogue (sizes, glass, motors, fabric, warranties), plus a button that loads that product into the quote builder. Photos can be swiped on phones.
+- **Product viewer.** Every product with photos opens a gallery with its installation photos and technical renders, and the specs from the catalogue (sizes, glass, motors, fabric, warranties), plus a button that loads that product into the quote builder. Photos can be swiped on phones.
 - **What it's made of.** Under the intro: aluminium, glass, fabric, and motors & LED, each with the facts from the catalogue.
 - **Side closures, certificates, 20 years.** A photo grid of ZIP screens, guillotine and sliding glass and aluminium panels. Certificate cards styled after Loni's TÜV documents. A giant "20" filled with photos of their projects, as in their anniversary post.
 - **Quote builder with a spec sheet.** Pick the product, width and depth (or height), RAL colour, fabric, motor (SOMFY / BECKER / manual) and extras. A scaled plan or front view draws itself with dimension lines, and a spec sheet with a reference number fills in as you go, then gets stamped when sent. The request opens in the visitor's email app addressed to `tenda@loni-ks.com`, fully written out (or in WhatsApp, if a number is set). It can also be copied.
@@ -21,7 +21,7 @@ A fast, single-page site with no build step and no dependencies. It is in **Alba
 - Accessibility: 0 violations in an axe-core audit (WCAG 2.1 A/AA and best practices), in both languages, on desktop and mobile. Keyboard friendly, and motion switches off for people who ask their device for reduced motion.
 - Lighthouse (local server): desktop 99 performance / 100 accessibility / 100 best practices / 100 SEO; mobile 80 / 100 / 100 / 100. On GitHub Pages mobile scores higher, since files are served compressed.
 - Fonts (Archivo, Manrope, Instrument Serif, IBM Plex Mono; all SIL Open Font License) are served with the site from `assets/fonts/`, so nothing loads from another server except the Google Map.
-- Checked at 1920, 1440, 1280, 1024, 768, 390 and 360 px in both languages: no sideways scrolling, no clipped text, no console errors. HTML validated with html-validate.
+- Checked at 1920, 1440, 1280, 1024, 768, 390, 360 and 320 px in both languages: no sideways scrolling, no clipped or overlapping text, no console errors. HTML validated with html-validate.
 - Photos are WebP in two sizes (960 px and full) with `srcset`, and load lazily. Background photos load only when they come near the screen.
 - `HomeAndConstructionBusiness` structured data with certificates and social profiles, Open Graph image `assets/og.jpg`, `robots.txt`, `sitemap.xml`, `site.webmanifest`, app icons and a branded `404.html`.
 

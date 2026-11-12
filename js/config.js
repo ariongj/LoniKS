@@ -12,7 +12,7 @@ window.LONI = {
   years: 20,                // shown as "+20 vite"
   // What everything is built from (from the 2026 catalogue). Shown under the intro.
   materials: [
-    { icon: "alu",    sq: "Alumini",         en: "Aluminium",     d: { sq: "Profile të ekstruduara 6065, të ngjyrosura me pluhur në fabrikë. Standard në RAL 7016.", en: "Extruded 6065 profiles, powder-coated in the factory. RAL 7016 as standard." } },
+    { icon: "alu",    sq: "Alumini",         en: "Aluminium",     d: { sq: "Profile të ekstruduara 6065, me ngjyrosje elektrostatike në fabrikë. Standard në RAL 7016.", en: "Extruded 6065 profiles, powder-coated in the factory. RAL 7016 as standard." } },
     { icon: "glass",  sq: "Xhami",           en: "Glass",         d: { sq: "Xham sigurie i laminuar 4+4 ose 5+5, ose termopan 4+14+4.", en: "Laminated safety glass, 4+4 or 5+5, or 4+14+4 double glazing." } },
     { icon: "fabric", sq: "Shtofi",          en: "Fabric",        d: { sq: "Shtof Sattler për ZIP perdet dhe tendat, me 5 vite garanci.", en: "Sattler fabric for ZIP screens and awnings, with a 5-year warranty." } },
     { icon: "motor",  sq: "Motorët & LED",   en: "Motors & LED",  d: { sq: "Motorë SOMFY dhe BECKER me telekomandë; ndriçim LED nga Samsung.", en: "SOMFY and BECKER motors with remote control; LED lighting by Samsung." } }
@@ -65,7 +65,7 @@ window.LONI = {
     { img: "assets/img/mbyllje-zip.webp",      sq: "ZIP perde",      en: "ZIP screens",      product: "zip" },
     { img: "assets/img/mbyllje-gijotine.webp", sq: "Xhama gijotinë", en: "Guillotine glass", product: "gijot" },
     { img: "assets/img/mbyllje-slide.webp",    sq: "Xhama slide",    en: "Sliding glass",    product: "slide" },
-    { img: "assets/img/mbyllje-alumin.webp",   sq: "Fleta alumini",  en: "Aluminium panels", product: "" }
+    { img: "assets/img/mbyllje-alumin.webp",   sq: "Panele alumini", en: "Aluminium panels", product: "" }
   ],
 
   // "20 years with you": the photo shown inside the big number, plus optional factory and team photos.
@@ -98,10 +98,10 @@ window.LONI = {
     { id: "pergola", cat: "pergola", plan: "louvres",
       photos: ["assets/img/bioklimatike.webp", "assets/img/pergola-dyshe.webp", "assets/img/pergola-modulare-e-varur.webp"],
       sq: "Pergola bioklimatike", en: "Bioclimatic pergola",
-      d: { sq: "Strukturë tërësisht prej alumini me ngjyrosje elektrostatike. Lamelat rrotullohen me telekomandë: hapini për ajër e dritë, mbyllini për hije dhe shi.",
-           en: "A fully aluminium structure with electrostatic powder coating. The louvres turn by remote: open them for air and light, close them for shade and rain." },
+      d: { sq: "Strukturë tërësisht prej alumini me ngjyrosje elektrostatike. Lamelat rrotullohen me telekomandë: hapini për ajër e dritë, mbyllini për hije dhe mbrojtje nga shiu.",
+           en: "A fully aluminium structure with electrostatic powder coating. The louvres turn by remote: open them for air and light, close them for shade and shelter from the rain." },
       specs: [
-        [{ sq: "Struktura", en: "Structure" }, { sq: "Alumin 6065, ngjyrosje me pluhur", en: "6065 aluminium, powder-coated" }],
+        [{ sq: "Struktura", en: "Structure" }, { sq: "Alumin 6065, ngjyrosje elektrostatike", en: "6065 aluminium, powder-coated" }],
         [{ sq: "Lamelat", en: "Louvres" }, { sq: "Rrotullohen me telekomandë", en: "Turn by remote" }],
         [{ sq: "Motori", en: "Motor" }, "SOMFY / BECKER"],
         [{ sq: "Ndriçimi", en: "Lighting" }, "LED"],
@@ -115,12 +115,12 @@ window.LONI = {
       d: { sq: "Strukturë elegante për çdo stinë, me konstruksion alumini të klasit të parë dhe xham sigurie që mbron nga moti. Drenazhi është i integruar, për komoditet dhe dritë natyrale gjatë gjithë vitit.",
            en: "An elegant structure for every season, with first-class aluminium and safety glass that keeps the weather out. Drainage is built in, for comfort and natural light all year round." },
       specs: [
-        [{ sq: "Xhami", en: "Glass" }, { sq: "Laminat sigurie 4+4 ose 5+5", en: "Laminated safety glass, 4+4 or 5+5" }],
-        [{ sq: "Gjerësia", en: "Width" }, { sq: "Pa limit", en: "No limit" }],
+        [{ sq: "Xhami", en: "Glass" }, { sq: "Sigurie, i laminuar, 4+4 ose 5+5", en: "Laminated safety glass, 4+4 or 5+5" }],
+        [{ sq: "Gjerësia", en: "Width" }, { sq: "Pa kufi", en: "No limit" }],
         [{ sq: "Shtrirja", en: "Projection" }, "max 400 cm"],
         [{ sq: "Ndriçimi", en: "Lighting" }, "LED Samsung"],
         [{ sq: "Drenazhi", en: "Drainage" }, { sq: "I fshehur, i integruar", en: "Hidden, built in" }],
-        [{ sq: "Garancioni", en: "Warranty" }, { sq: "2 vite", en: "2 years" }]
+        [{ sq: "Garancia", en: "Warranty" }, { sq: "2 vite", en: "2 years" }]
       ],
       w: [2, 8, 4], dpt: [2, 4, 3], drives: [], extras: ["led", "side", "glass", "heater"] },
 
@@ -133,7 +133,7 @@ window.LONI = {
         [{ sq: "Përmasat", en: "Size" }, "max 400 × 400 cm"],
         [{ sq: "Xhami", en: "Glass" }, { sq: "4+4 sigurie / 4+14+4 termopan", en: "4+4 safety / 4+14+4 double glazing" }],
         [{ sq: "Motori", en: "Motor" }, { sq: "BECKER, prodhim gjerman", en: "BECKER, made in Germany" }],
-        [{ sq: "Operimi", en: "Operation" }, { sq: "Automatik, me telekomandë", en: "Automatic, by remote" }],
+        [{ sq: "Komandimi", en: "Control" }, { sq: "Automatik, me telekomandë", en: "Automatic, by remote" }],
         [{ sq: "Struktura", en: "Structure" }, { sq: "Alumin 6065, RAL 7016", en: "6065 aluminium, RAL 7016" }]
       ],
       w: [2, 4, 3.5], dpt: [1.5, 4, 2.4], h: true, drives: ["becker"], extras: ["led"] },
@@ -155,28 +155,28 @@ window.LONI = {
     { id: "zip", cat: "awning", plan: "screen", fabric: true,
       photos: ["assets/img/zip-3.webp", "assets/img/zip-1.webp", "assets/img/zip-2.webp", "assets/img/zip-4.webp", "assets/img/zip-render.webp"],
       sq: "ZIP perde", en: "ZIP screens",
-      d: { sq: "Mbrojtje automatike nga dielli dhe era, me pamje moderne. Rrjeta lëviz vertikalisht nëpër profilet anësore, e qetë dhe me telekomandë.",
+      d: { sq: "Mbrojtje automatike nga dielli dhe era, me pamje moderne. Shtofi lëviz vertikalisht nëpër profilet anësore, qetë dhe me telekomandë.",
            en: "Automatic protection from sun and wind with a modern look. The screen runs vertically in side channels, quietly and by remote." },
       specs: [
         [{ sq: "Përmasat", en: "Size" }, "max 500 × 350 cm"],
         [{ sq: "Shtofi", en: "Fabric" }, "Sattler"],
         [{ sq: "Mbrojtja", en: "Protection" }, { sq: "Nga dielli, era dhe insektet; jep privatësi", en: "Sun, wind and insects; adds privacy" }],
         [{ sq: "Me kërkesë", en: "Optional" }, { sq: "Sensor ere", en: "Wind sensor" }],
-        [{ sq: "Garancioni", en: "Warranty" }, { sq: "2 vite sistemi, 5 vite shtofi", en: "2 years system, 5 years fabric" }]
+        [{ sq: "Garancia", en: "Warranty" }, { sq: "2 vite sistemi, 5 vite shtofi", en: "2 years system, 5 years fabric" }]
       ],
       w: [1, 5, 3], dpt: [1.5, 3.5, 2.5], h: true, drives: ["somfy", "becker"], extras: ["wind"] },
 
     { id: "mbixham", cat: "awning", plan: "glassroof", fabric: true,
       photos: ["assets/img/tenda-mbi-xham-render.webp"],
       sq: "Tenda mbi xham", en: "Glass-roof awning",
-      d: { sq: "Hijezim modern për çati xhami apo tavane të hapura, e montuar sipër ose nën xham. Kontrollohet lehtë me telekomandë, zgjat shumë dhe kërkon pak mirëmbajtje.",
+      d: { sq: "Hijezim modern për çati xhami apo tavane të hapura, i montuar sipër ose nën xham. Kontrollohet lehtë me telekomandë, zgjat shumë dhe kërkon pak mirëmbajtje.",
            en: "Modern shading for glass roofs or open ceilings, mounted above or below the glass. Easy to run by remote, long-lasting and low-maintenance." },
       specs: [
         [{ sq: "Shtofi", en: "Fabric" }, "Sattler"],
-        [{ sq: "Operimi", en: "Operation" }, { sq: "Manual / automatik", en: "Manual / automatic" }],
+        [{ sq: "Komandimi", en: "Control" }, { sq: "Manual / automatik", en: "Manual / automatic" }],
         [{ sq: "Montimi", en: "Mounting" }, { sq: "Sipër ose nën xham", en: "Above or below the glass" }],
         [{ sq: "Me kërkesë", en: "Optional" }, { sq: "Motor, sensor ere", en: "Motor, wind sensor" }],
-        [{ sq: "Garancioni", en: "Warranty" }, { sq: "2 vite sistemi, 5 vite shtofi", en: "2 years system, 5 years fabric" }]
+        [{ sq: "Garancia", en: "Warranty" }, { sq: "2 vite sistemi, 5 vite shtofi", en: "2 years system, 5 years fabric" }]
       ],
       w: [2, 7, 4], dpt: [2, 6, 3.5], drives: ["manual", "somfy", "becker"], extras: ["wind", "sun"] },
 
@@ -222,7 +222,7 @@ window.LONI = {
     rain:   { sq: "Sensor shiu",     en: "Rain sensor" },
     wind:   { sq: "Sensor ere",      en: "Wind sensor" },
     sun:    { sq: "Sensor dielli",   en: "Sun sensor" },
-    side:   { sq: "Tenda anësore",   en: "Side screens" },
+    side:   { sq: "ZIP perde anësore", en: "Side ZIP screens" },
     glass:  { sq: "Xhama anësorë",   en: "Side glass" },
     heater: { sq: "Ngrohës",         en: "Heater" }
   },

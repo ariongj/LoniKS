@@ -21,7 +21,7 @@ window.DRAW = (() => {
       <text x="${x + 10}" y="${(y0 + y1) / 2}" text-anchor="middle" transform="rotate(-90 ${x + 10} ${(y0 + y1) / 2})" dy="-4">${label}</text></g>`;
   }
 
-  // o: { product, w, d, color, fabric, extras:Set, labels:{wall, view} }
+  // o: { product, w, d, color, fabric, extras:Set, labels:{wall} }
   function plan(o) {
     const p = o.product;
     const elev = elevations.has(p.plan);
@@ -61,7 +61,7 @@ window.DRAW = (() => {
         let d = "";
         for (let i = 1; i < n; i++) d += `M${(x0 + W * i / n).toFixed(1)} ${top}V${y1}`;
         out.push(`<path class="p-rafter" d="${d}"/>`);
-        if (p.fabric) out.push(`<rect class="p-fab ${p.id === "nenxham" ? "p-fab--under" : ""}" x="${x0 + 6}" y="${top + 4}" width="${W - 12}" height="${D - 8}" fill="${fab}"/>`);
+        if (p.fabric) out.push(`<rect class="p-fab" x="${x0 + 6}" y="${top + 4}" width="${W - 12}" height="${D - 8}" fill="${fab}"/>`);
         break;
       }
       case "awning":

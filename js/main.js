@@ -137,13 +137,22 @@
      ====================================================================== */
   const header = $("#header");
   const burger = $("#burger");
-  function setMenu(open) {
+  const behindMenu = () => [$("main"), $(".footer"), $("#dock")];
+  function setMenu(open, { returnFocus = false } = {}) {
+    const was = document.body.classList.contains("menu-open");
     document.body.classList.toggle("menu-open", open);
     burger.setAttribute("aria-expanded", String(open));
+    behindMenu().forEach((el) => el && el.toggleAttribute("inert", open));
+    if (open && !was) $("#nav a").focus({ preventScroll: true });
+    if (!open && was && returnFocus) burger.focus({ preventScroll: true });
   }
-  burger.addEventListener("click", () => setMenu(!document.body.classList.contains("menu-open")));
+  burger.addEventListener("click", () => {
+    const open = !document.body.classList.contains("menu-open");
+    setMenu(open, { returnFocus: !open });
+  });
   $$("#nav a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
-  addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false, { returnFocus: true }); });
+  matchMedia("(max-width: 960px)").addEventListener("change", (e) => { if (!e.matches) setMenu(false); });
   if (phones[0]) {
     $("#headerPhone").href = tel(phones[0]);
     $("#headerPhone span").textContent = nb(phones[0]);
@@ -236,12 +245,20 @@
     });
   }
 
-  let queued = null;
+  let queued = null, pendingSrc = null;
+  // The slats are cut for the current window size; if it changes mid-transition, finish at once.
+  addEventListener("resize", () => {
+    if (!pendingSrc) return;
+    heroImg.style.backgroundImage = `url("${pendingSrc}")`;
+    heroSlats.classList.remove("is-on");
+    heroSlats.innerHTML = "";
+  });
   async function show(next) {
     if (!slides.length) return;
     if (busy) { queued = next; return; }
+    clearTimeout(timer);
     next = (next + slides.length) % slides.length;
-    if (next === current && heroImg.style.backgroundImage) return;
+    if (next === current && heroImg.style.backgroundImage) { schedule(); return; }
     busy = true;
     const src = fit(slides[next].src);
     const { w, h } = await loadSize(src);
@@ -260,7 +277,9 @@
         return `<i style="top:${top}px;height:${hh}px;background-image:url('${src}');background-size:${bw}px ${bh}px;background-position:${ox}px ${oy - top}px;animation-delay:${i * SLAT_STAGGER}ms"></i>`;
       }).join("");
       heroSlats.classList.add("is-on");
+      pendingSrc = src;
       await new Promise((r) => setTimeout(r, SLAT_MS + n * SLAT_STAGGER));
+      pendingSrc = null;
       heroImg.style.backgroundImage = `url("${src}")`;
       heroImg.classList.remove("is-zoom"); void heroImg.offsetWidth; heroImg.classList.add("is-zoom");
       heroSlats.classList.remove("is-on");
@@ -684,12 +703,16 @@
   async function copyMessage() {
     try { await navigator.clipboard.writeText(message()); toast(t("copied")); }
     catch {
+      const back = document.activeElement;
       const ta = document.createElement("textarea");
       ta.value = message();
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none";
       document.body.appendChild(ta);
       ta.select();
       try { document.execCommand("copy"); toast(t("copied")); } catch { /* nothing more to try */ }
       ta.remove();
+      if (back && back.focus) back.focus({ preventScroll: true });
     }
   }
 

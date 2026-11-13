@@ -17,6 +17,7 @@ window.I18N = {
     "cta.photos": "See the photos",
     "call": "Call",
     "dock": "Quick contact",
+    "menu": "Menu",
     "navMain": "Main",
     "navFooter": "Footer",
     "prev": "Previous",

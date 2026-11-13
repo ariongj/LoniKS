@@ -25,6 +25,7 @@
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/archivo-normal-1.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/manrope-normal-0.woff2" crossorigin />
   <link rel="stylesheet" href="css/styles.css" />
+  <noscript><style>.loader { display: none; } .reveal { opacity: 1; transform: none; }</style></noscript>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -93,7 +94,7 @@
           <button type="button" data-lang="en" aria-pressed="false">EN</button>
         </div>
         <a class="btn btn--red header__cta" href="#offer" data-magnetic data-i18n="cta.offer">Kërkoni ofertë</a>
-        <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menyja">
+        <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="nav" data-i18n-attr="aria-label:menu" aria-label="Menyja">
           <span></span><span></span>
         </button>
       </div>
@@ -286,7 +287,7 @@
                 <label class="field"><span data-i18n="o.name">Emri</span><input id="fName" name="name" type="text" autocomplete="name" required data-i18n-attr="placeholder:o.nameP" placeholder="Emri dhe mbiemri" /></label>
                 <label class="field"><span data-i18n="o.phone">Telefoni</span><input id="fPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="+383 4x xxx xxx" /></label>
                 <label class="field"><span data-i18n="o.place">Vendi</span><input id="fPlace" name="place" type="text" autocomplete="address-level2" data-i18n-attr="placeholder:o.placeP" placeholder="P.sh. Prishtinë" /></label>
-                <label class="field field--wide"><span><span data-i18n="o.note">Shënim</span> <small data-i18n="o.optional">(sipas dëshirës)</small></span><textarea id="fNote" name="note" rows="2" data-i18n-attr="placeholder:o.noteP" placeholder="P.sh. terasa është në katin e parë, me pamje nga jugu"></textarea></label>
+                <label class="field field--wide"><span><span data-i18n="o.note">Shënim</span> <small data-i18n="o.optional">(sipas dëshirës)</small></span><textarea id="fNote" name="note" rows="2" maxlength="600" data-i18n-attr="placeholder:o.noteP" placeholder="P.sh. terasa është në katin e parë, me pamje nga jugu"></textarea></label>
               </div>
             </fieldset>
           </form>

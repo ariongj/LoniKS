@@ -1,8 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://ariongj.github.io/LoniKS/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
+    <lastmod>2026-11-21</lastmod>
+    <image:image>
+      <image:loc>https://ariongj.github.io/LoniKS/assets/img/bioklimatike.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://ariongj.github.io/LoniKS/assets/img/mbuloje-xhami.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://ariongj.github.io/LoniKS/assets/img/gijotine-1.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://ariongj.github.io/LoniKS/assets/img/slide-1.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://ariongj.github.io/LoniKS/assets/img/zip-3.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://ariongj.github.io/LoniKS/assets/img/pergola-dyshe.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://ariongj.github.io/LoniKS/assets/img/tenda-mbi-xham-render.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://ariongj.github.io/LoniKS/assets/img/mbyllje-zip.webp</image:loc>
+    </image:image>
   </url>
 </urlset>

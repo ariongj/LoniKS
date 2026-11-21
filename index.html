@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Loni Tenda · Pergola bioklimatike, xhama dhe tenda · Shtime, Kosovë</title>
-  <meta name="description" content="Loni Tenda: +20 vite prodhim në Shtime. Pergola bioklimatike, mbuloja xhami, xhama gijotinë dhe slide, ZIP perde dhe tenda. E certifikuar me ISO 9001, 14001 dhe 45001, me shenjën CE. Kërkoni ofertë." />
+  <title>Pergola bioklimatike, xhama dhe tenda · Loni Tenda, Shtime</title>
+  <meta name="description" content="Pergola bioklimatike, mbuloja xhami, xhama gijotinë dhe slide, ZIP perde dhe tenda, të prodhuara në Shtime. +20 vite përvojë, ISO 9001. Kërkoni ofertë." />
   <meta name="theme-color" content="#0c0c0d" />
   <link rel="canonical" href="https://ariongj.github.io/LoniKS/" />
   <meta property="og:type" content="website" />
@@ -17,7 +17,13 @@
   <meta property="og:image" content="https://ariongj.github.io/LoniKS/assets/og.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:alt" content="Pergola bioklimatike Loni në mbrëmje, me ndriçim LED, mbi një tarracë me ndenjëse." />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Loni Tenda · E bërë për jetën jashtë" />
+  <meta name="twitter:description" content="Pergola bioklimatike, xhama dhe tenda të prodhuara në Shtime, me certifikim ISO dhe CE. +20 vite me ju." />
+  <meta name="twitter:image" content="https://ariongj.github.io/LoniKS/assets/og.jpg" />
+  <meta name="twitter:image:alt" content="Pergola bioklimatike Loni në mbrëmje, me ndriçim LED, mbi një tarracë me ndenjëse." />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/icon-180.png" />
   <link rel="manifest" href="site.webmanifest" />
@@ -29,25 +35,46 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "HomeAndConstructionBusiness",
-    "name": "Loni Tenda",
-    "legalName": "N.T.SH. LONI",
-    "url": "https://ariongj.github.io/LoniKS/",
-    "logo": "https://ariongj.github.io/LoniKS/assets/icon-512.png",
-    "image": "https://ariongj.github.io/LoniKS/assets/img/bioklimatike.webp",
-    "email": "tenda@loni-ks.com",
-    "telephone": ["+38349206030", "+38344206030"],
-    "address": { "@type": "PostalAddress", "streetAddress": "Rr. Ibrahim Rugova Nr. 962, Davidovc", "addressLocality": "Shtime", "addressCountry": "XK" },
-    "areaServed": "Kosovo",
-    "sameAs": ["https://www.instagram.com/tenda.loni/", "https://www.facebook.com/tenda.loni"],
-    "hasCredential": ["ISO 9001:2015", "ISO 14001:2015", "ISO 45001:2018", "CE"],
-    "makesOffer": [
-      { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Pergola bioklimatike" } },
-      { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Mbulojë xhami" } },
-      { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Xhama gijotinë" } },
-      { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Xhama slide" } },
-      { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "ZIP perde" } },
-      { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Tenda" } }
+    "@graph": [
+      {
+        "@type": "HomeAndConstructionBusiness",
+        "@id": "https://ariongj.github.io/LoniKS/#business",
+        "name": "Loni Tenda",
+        "legalName": "N.T.SH. LONI",
+        "url": "https://ariongj.github.io/LoniKS/",
+        "logo": "https://ariongj.github.io/LoniKS/assets/icon-512.png",
+        "image": ["https://ariongj.github.io/LoniKS/assets/og.jpg", "https://ariongj.github.io/LoniKS/assets/img/bioklimatike.webp"],
+        "description": "Prodhim dhe montim i pergolave bioklimatike, mbulojave të xhamit, xhamave gijotinë dhe slide, ZIP perdeve dhe tendave, në Shtime, Kosovë.",
+        "email": "tenda@loni-ks.com",
+        "telephone": ["+38349206030", "+38344206030"],
+        "address": { "@type": "PostalAddress", "streetAddress": "Rr. Ibrahim Rugova Nr. 962, Davidovc", "addressLocality": "Shtime", "addressCountry": "XK" },
+        "areaServed": { "@type": "Country", "name": "Kosovo" },
+        "openingHoursSpecification": [
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "08:00", "closes": "17:00" }
+        ],
+        "sameAs": ["https://www.instagram.com/tenda.loni/", "https://www.facebook.com/tenda.loni"],
+        "hasCredential": [
+          { "@type": "EducationalOccupationalCredential", "name": "ISO 9001:2015", "credentialCategory": "certification", "recognizedBy": { "@type": "Organization", "name": "TÜV AUSTRIA" } },
+          { "@type": "EducationalOccupationalCredential", "name": "ISO 14001:2015", "credentialCategory": "certification", "recognizedBy": { "@type": "Organization", "name": "TÜV AUSTRIA" } },
+          { "@type": "EducationalOccupationalCredential", "name": "ISO 45001:2018", "credentialCategory": "certification", "recognizedBy": { "@type": "Organization", "name": "TÜV AUSTRIA" } }
+        ],
+        "makesOffer": [
+          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Pergola bioklimatike" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Mbulojë xhami" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Xhama gijotinë" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Xhama slide" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "ZIP perde" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Tenda" } }
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://ariongj.github.io/LoniKS/#website",
+        "url": "https://ariongj.github.io/LoniKS/",
+        "name": "Loni Tenda",
+        "inLanguage": "sq",
+        "publisher": { "@id": "https://ariongj.github.io/LoniKS/#business" }
+      }
     ]
   }
   </script>
@@ -112,8 +139,7 @@
 
       <div class="hero__inner">
         <div class="hero__copy">
-          <p class="eyebrow"><span><span class="js-yplus">+20</span> <span data-i18n="hero.years">vite</span></span><i></i><span data-i18n="hero.made">Prodhuar në Shtime, Kosovë</span></p>
-          <h1 id="heroTitle" class="hero__title" data-i18n-html="hero.title"><span class="line">E bërë për</span><span class="line"><em>jetën jashtë.</em></span></h1>
+          <h1 id="heroTitle" class="hero__title"><span class="eyebrow hero__kicker"><span data-i18n="hero.kicker">Pergola, xhama dhe tenda</span> <i aria-hidden="true">–</i> <span data-i18n="hero.made">Shtime, Kosovë</span></span> <span class="hero__lines" data-i18n-html="hero.title"><span class="line">E bërë për</span> <span class="line"><em>jetën jashtë.</em></span></span></h1>
           <p class="hero__lead" data-i18n="hero.lead">Pergola bioklimatike, mbuloja xhami, xhama gijotinë dhe slide, ZIP perde dhe tenda: të projektuara, të prodhuara dhe të montuara nga ekipi ynë.</p>
           <div class="hero__actions">
             <a class="btn btn--red btn--lg" href="#offer" data-magnetic><span data-i18n="cta.offer">Kërkoni ofertë</span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -418,6 +444,7 @@
 
   <script src="js/config.js"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/image-sizes.js"></script>
   <script src="js/draw.js"></script>
   <script src="js/main.js"></script>
 </body>

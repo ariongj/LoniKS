@@ -35,7 +35,9 @@ window.LONI = {
 
   // Opening hours in local time. null = closed that day. Set `hours: null` to hide them.
   timezone: "Europe/Belgrade",
-  hours: null,
+  // From the old loni-ks.com: Monday to Friday 08:00–17:00, closed at weekends.
+  hours: { mon: ["08:00", "17:00"], tue: ["08:00", "17:00"], wed: ["08:00", "17:00"],
+           thu: ["08:00", "17:00"], fri: ["08:00", "17:00"], sat: null, sun: null },
   // hours: { mon: ["08:00", "17:00"], tue: ["08:00", "17:00"], wed: ["08:00", "17:00"],
   //          thu: ["08:00", "17:00"], fri: ["08:00", "17:00"], sat: ["08:00", "14:00"], sun: null },
 

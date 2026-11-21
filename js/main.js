@@ -32,9 +32,11 @@
   const isRender = (src) => !/\/(bioklimatike|mbuloje-xhami|mbuloje-xhami-render|gijotine-\d|slide-\d|zip-\d|mbyllje-[a-z]+|collage)\.webp$/.test(src);
   // Every image has a 960 px sibling: name-960.webp.
   const small = (src) => src.replace(/\.webp$/, "-960.webp");
+  // width/height from js/image-sizes.js, so the browser keeps the right space before a photo loads
+  const dims = (src) => { const d = (window.IMG_SIZES || {})[src]; return d ? ` width="${d[0]}" height="${d[1]}"` : ""; };
   const srcset = (src) => `${small(src)} 960w, ${src} 1800w`;
   const img = (src, alt, sizes, extra = "") =>
-    `<img src="${esc(small(src))}" srcset="${esc(srcset(src))}" sizes="${sizes}" alt="${esc(alt)}" loading="lazy" decoding="async" ${extra}/>`;
+    `<img src="${esc(small(src))}" srcset="${esc(srcset(src))}" sizes="${sizes}" alt="${esc(alt)}" loading="lazy" decoding="async"${dims(src)} ${extra}/>`;
   const fit = (src) => (innerWidth * (devicePixelRatio || 1) <= 960 ? small(src) : src);
 
   const ICON = {
@@ -87,18 +89,22 @@
   /* ======================================================================
      Language
      ====================================================================== */
-  function applyLang(next) {
+  // soon: when the visitor switches language, rebuild the drawn sections just after the next paint,
+  // so the tap answers at once (Interaction to Next Paint) and the page follows a frame later.
+  function applyLang(next, soon = false) {
     lang = next;
     store.set("lang", lang);
     document.documentElement.lang = lang;
 
     $$("[data-i18n]").forEach((el) => {
       if (el.dataset.sq === undefined) el.dataset.sq = el.textContent;
-      el.textContent = lang === "sq" ? el.dataset.sq : EN[el.dataset.i18n] ?? el.dataset.sq;
+      const text = lang === "sq" ? el.dataset.sq : EN[el.dataset.i18n] ?? el.dataset.sq;
+      if (el.textContent !== text) el.textContent = text;   // untouched text keeps its first paint (LCP)
     });
     $$("[data-i18n-html]").forEach((el) => {
       if (el.dataset.sq === undefined) el.dataset.sq = el.innerHTML;
-      el.innerHTML = lang === "sq" ? el.dataset.sq : EN[el.dataset.i18nHtml] ?? el.dataset.sq;
+      const html = lang === "sq" ? el.dataset.sq : EN[el.dataset.i18nHtml] ?? el.dataset.sq;
+      if (el.innerHTML !== html) el.innerHTML = html;
     });
     $$("[data-i18n-attr]").forEach((el) => {
       el.dataset.i18nAttr.split(";").forEach((pair) => {
@@ -114,10 +120,15 @@
     $$(".js-yplus").forEach((el) => (el.textContent = lang === "sq" ? `+${C.years}` : `${C.years}+`));
     document.title = t("title");
     $('meta[name="description"]').setAttribute("content", t("desc"));
-    splitManifesto();
-    renderAll();
-    const err = $("#formError");
-    if (!err.hidden && err.dataset.key) err.textContent = t(err.dataset.key);
+    const rest = () => {
+      splitManifesto();
+      renderAll();
+      const err = $("#formError");
+      if (!err.hidden && err.dataset.key) err.textContent = t(err.dataset.key);
+    };
+    if (!soon) return rest();
+    renderHeroNav();
+    requestAnimationFrame(() => setTimeout(rest, 0));
   }
 
   function renderAll() {
@@ -393,8 +404,8 @@
       // the wide first card has room for every spec; the others show the two most telling ones
       const keys = (p.specs || []).slice(0, i === 0 ? 5 : 2).map(([k, v]) => `<li><span>${esc(local(k))}</span><b>${esc(local(v))}</b></li>`).join("");
       return `
-      <li class="card reveal${rv}${i === 0 ? " card--wide" : ""}">
-        <button type="button" class="card__media${isRender(src) ? " card__media--render" : ""}" data-gallery="${p.id}" aria-label="${esc(local(p))}: ${n} ${esc(t(n === 1 ? "photo" : "photos"))}">
+      <li class="card reveal${rv}${i === 0 ? " card--wide" : ""}" id="p-${p.id}">
+        <button type="button" class="card__media${isRender(src) ? " card__media--render" : ""}" data-gallery="${p.id}" aria-label="${esc(t("seePhotos"))}: ${esc(local(p))} (${n} ${esc(t(n === 1 ? "photo" : "photos"))})">
           ${img(src, "", i === 0 ? "(max-width: 960px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw")}
           ${n > 1 ? `<span class="card__count">${ICON.photos}${n}</span>` : ""}
         </button>
@@ -422,7 +433,7 @@
         <h3 class="card__title">${esc(t("more"))}</h3>
         <p class="card__text">${esc(t("moreLead"))}</p>
         <ul class="more__list">${rest.map((p) => `
-          <li>
+          <li id="p-${p.id}">
             <div><h4>${esc(local(p))}</h4><p>${esc(local(p.d))}</p></div>
             <button type="button" class="card__cta" data-quote="${p.id}" aria-label="${esc(t("request"))}: ${esc(local(p))}">${esc(t("request"))}${ICON.arrow}</button>
           </li>`).join("")}
@@ -459,7 +470,7 @@
     $("#viewerSpecs").innerHTML = specList(p.specs);
     $("#viewerQuote").dataset.quote = p.id;
     $("#viewerThumbs").innerHTML = p.photos.map((src, i) =>
-      `<button type="button" data-thumb="${i}" class="${isRender(src) ? "is-render" : ""}" aria-label="${i + 1} / ${p.photos.length}"><img src="${esc(small(src))}" alt="" loading="lazy" /></button>`).join("");
+      `<button type="button" data-thumb="${i}" class="${isRender(src) ? "is-render" : ""}" aria-label="${i + 1} / ${p.photos.length}"><img src="${esc(small(src))}" alt="" loading="lazy"${dims(src)} /></button>`).join("");
     const multi = p.photos.length > 1;
     $("#viewerPrev").hidden = $("#viewerNext").hidden = $("#viewerThumbs").hidden = !multi;
     showPhoto(index);
@@ -472,7 +483,7 @@
     const src = photos[vIndex];
     const box = $("#viewerImg");
     box.classList.toggle("is-render", isRender(src));
-    box.innerHTML = `<img src="${esc(small(src))}" srcset="${esc(srcset(src))}" sizes="(max-width: 1080px) 100vw, 60vw" alt="${esc(local(vProduct))} · ${vIndex + 1}/${photos.length}" decoding="async" />`;
+    box.innerHTML = `<img src="${esc(small(src))}" srcset="${esc(srcset(src))}" sizes="(max-width: 1080px) 100vw, 60vw" alt="${esc(local(vProduct))} · ${vIndex + 1}/${photos.length}" decoding="async"${dims(src)} />`;
     $$("#viewerThumbs button").forEach((b, j) => b.setAttribute("aria-current", String(j === vIndex)));
   }
   swipe($("#viewerImg"), (dir) => showPhoto(vIndex + dir));
@@ -563,7 +574,7 @@
     const tile = (x) => {
       const src = x.photos[0];
       return `<button type="button" class="pick__item" data-product="${x.id}" aria-pressed="${x.id === p.id}">
-        <img src="${esc(small(src))}" alt="" loading="lazy" class="${isRender(src) ? "is-render" : ""}" /><span>${esc(local(x))}</span></button>`;
+        <img src="${esc(small(src))}" alt="" loading="lazy"${dims(src)} class="${isRender(src) ? "is-render" : ""}" /><span>${esc(local(x))}</span></button>`;
     };
     const pill = (x) => `<button type="button" class="pick__pill" data-product="${x.id}" aria-pressed="${x.id === p.id}">${esc(local(x))}</button>`;
     $("#pickProduct").innerHTML = `<div class="pick__tiles">${withPhotos.map(tile).join("")}</div>
@@ -817,11 +828,7 @@
   $("#year").textContent = String(new Date().getFullYear());
   $("#legalName").textContent = C.name;
 
-  $$(".lang button").forEach((b) => b.addEventListener("click", () => applyLang(b.dataset.lang)));
-
-  applyLang(lang);
-  observe();
-  onScroll();
+  $$(".lang button").forEach((b) => b.addEventListener("click", () => applyLang(b.dataset.lang, true)));
 
   // The loader lifts as soon as the first hero photo is in (at most 1.2 s), never waiting for the whole page.
   let lifted = false;
@@ -830,7 +837,28 @@
     lifted = true;
     $("#loader").classList.add("is-done");
   }
-  const started = performance.now();
-  show(0).then(() => setTimeout(ready, reduceMotion ? 0 : Math.max(0, 350 - (performance.now() - started))));
-  setTimeout(ready, 1200);
+
+  function start() {
+    applyLang(lang);
+    observe();
+    onScroll();
+    // Products are drawn by the script, so a link to one (#p-pergola, from the old site's redirects) is scrolled to here.
+    if (location.hash.length > 1) {
+      let id = location.hash.slice(1);
+      try { id = decodeURIComponent(id); } catch { /* a malformed link: use it as written */ }
+      const target = document.getElementById(id);
+      if (target) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
+    }
+    const started = performance.now();
+    show(0).then(() => setTimeout(ready, reduceMotion ? 0 : Math.max(0, 350 - (performance.now() - started))));
+    setTimeout(ready, 1200);
+  }
+
+  // Let the browser paint the hero first and build the rest of the page in the next frame,
+  // so slow phones show the headline sooner (Largest Contentful Paint). The loader covers the gap.
+  if (document.hidden) start();
+  else {
+    renderHeroNav();   // small, and it sets the hero's height, so it is in the first paint (no layout shift)
+    requestAnimationFrame(() => setTimeout(start, 0));
+  }
 })();

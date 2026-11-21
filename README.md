@@ -19,11 +19,43 @@ A fast, single-page site with no build step and no dependencies. It is in **Alba
 ## Quality checks
 
 - Accessibility: 0 violations in an axe-core audit (WCAG 2.1 A/AA and best practices), in both languages, on desktop and mobile. Keyboard friendly, and motion switches off for people who ask their device for reduced motion.
-- Lighthouse (local server): desktop 99 performance / 100 accessibility / 100 best practices / 100 SEO; mobile 88 / 100 / 100 / 100 (three runs: 88, 90, 90). On GitHub Pages mobile may score higher, since files are served compressed.
+- Lighthouse, median of three runs on a local server set up like GitHub Pages (HTTP/2, compressed): mobile 96 performance / 100 accessibility / 100 best practices / 100 SEO, desktop 99 / 100 / 100 / 100. Mobile Core Web Vitals in the lab: LCP 2.4 s, CLS 0, TBT 96 ms; the slowest tap (switching language) answers in about 150 ms on a phone slowed 4×.
+- The page paints the hero first and builds the sections below it one frame later, so the headline shows sooner on slow phones; switching language works the same way.
 - Fonts (Archivo, Manrope, Instrument Serif, IBM Plex Mono; all SIL Open Font License) are served with the site from `assets/fonts/`, so nothing loads from another server except the Google Map.
 - Checked at 1920, 1440, 1280, 1024, 768, 390, 360 and 320 px in both languages: no sideways scrolling, no clipped or overlapping text, no console errors. HTML validated with html-validate.
 - Photos are WebP in two sizes (960 px and full) with `srcset`, and load lazily. Background photos load only when they come near the screen.
 - `HomeAndConstructionBusiness` structured data with certificates and social profiles, Open Graph image `assets/og.jpg`, `robots.txt`, `sitemap.xml`, `site.webmanifest`, app icons and a branded `404.html`.
+
+## SEO
+
+Built to the developer's technical SEO checklist (20 points):
+
+- **Indexing:** no `noindex` on the page, `robots.txt` allows everything and points to `sitemap.xml`; the sitemap lists the page with its date and eight main photos for Google Images. One `canonical` URL. Only the 404 page is `noindex`.
+- **Title and description:** "Pergola bioklimatike, xhama dhe tenda · Loni Tenda, Shtime" (58 characters) and a 151-character description with the products, the place and a call to action. Both switch to English with the language toggle.
+- **Headings:** one H1 that says what Loni makes and where ("Pergola, xhama dhe tenda – Shtime, Kosovë. E bërë për jetën jashtë."), then H2 per section and H3 per item, with no skipped levels.
+- **Sharing:** Open Graph and Twitter tags with a 1200 × 630 image and its alt text.
+- **Structured data:** a JSON-LD `@graph` with the business (address, phones, email, opening hours, ISO certificates, Instagram and Facebook, the six main products) and the website.
+- **Photos:** every photo has alt text (or is marked decorative), `width` and `height` from `js/image-sizes.js` so nothing jumps while loading, WebP in two sizes, lazy loading except the hero photo, which is preloaded.
+- **Old addresses:** the old site's pages (`/pergola/`, `/gijot/`, `/na-kontakto/`, ...) each have a small page in a folder of the same name that sends visitors and Google straight to the matching product or section. Each product can be linked directly, e.g. `#p-pergola`.
+
+| Old address | Goes to |
+| --- | --- |
+| `/pergola/` | `#p-pergola` Pergola bioklimatike |
+| `/produktet/`, `/tenda/`, `/mbuloja-pishine/` | `#products` |
+| `/gijot/` | `#p-gijot` Xhama gijotinë |
+| `/slide/`, `/xhama-levizes/` | `#p-slide` Xhama slide |
+| `/tenda-perde/` | `#p-zip` ZIP perde |
+| `/tenda-mbixham/` | `#p-mbixham` Tenda mbi xham |
+| `/tenda-kasete/` | `#p-kaseta` Tenda me kasetë |
+| `/tenda-klasike/` | `#p-klasike` Tenda klasike |
+| `/tenda-dritare/` | `#p-dritaresh` Tenda dritaresh |
+| `/cadra/` | `#p-cadra` Çadra |
+| `/certifikimet/` | `#quality` |
+| `/na-kontakto/`, `/footer/` | `#contact` |
+
+GitHub Pages can't send real 301 redirects, so these pages use an instant refresh with a `canonical` link, which Google treats the same way. If the site later moves to a host that supports redirects, replace them with 301s from the same table.
+
+Left for the owner once the site is on loni-ks.com: verify the domain in **Google Search Console**, submit `sitemap.xml`, check the pages with the URL Inspection and Rich Results tests, and turn on **Enforce HTTPS** in the repository's Pages settings.
 
 ## Editing the details
 
@@ -35,7 +67,7 @@ Everything is in **`js/config.js`**:
 | `whatsapp`, `viber` | Digits only, e.g. `38349206030`. With `whatsapp` set, quote requests open in WhatsApp |
 | `address`, `city`, `mapsQuery` | The address, the directions link and the embedded Google Map |
 | `social` | Instagram, Facebook, YouTube and LinkedIn links (hidden while empty) |
-| `hours` | Opening hours per day (`null` = closed). Leave `hours: null` to hide them |
+| `hours` | Opening hours per day (`null` = closed), shown in the contact section. Set to Monday–Friday 08:00–17:00 from the old site. Leave `hours: null` to hide them. If you change them, change `openingHoursSpecification` in `index.html` too |
 | `hero` | The hero slides: photo and caption |
 | `materials` | The four "what it's made of" items under the intro |
 | `featured` | The featured product and its configuration renders |
@@ -61,6 +93,8 @@ for f in sys.argv[1:]:
 " assets/img/*.jpg
 ```
 
+Then run `python3 tools/image-sizes.py`, which records each photo's width and height in `js/image-sizes.js` so the page keeps its space while it loads.
+
 ## Before going live
 
 Please confirm with Loni:
@@ -71,6 +105,7 @@ Please confirm with Loni:
 - **"Ofertë pa detyrim"** (no-obligation quote) and on-site measuring: is measuring free?
 - **"Our own team"** for installation: no subcontractors?
 - Frame colours (RAL 8019, wood effect) and the four fabric colours offered in the quote builder.
+- **Opening hours** Monday–Friday 08:00–17:00, taken from the old site. Saturday too?
 
 Still to add:
 
@@ -89,13 +124,22 @@ css/styles.css    all styling
 js/config.js      company details, photos, products, quote options
 js/i18n.js        English text + runtime strings
 js/draw.js        the quote builder's technical plan
+js/image-sizes.js width and height of each photo (made by tools/image-sizes.py)
 js/main.js        everything else
 assets/img/       photos and renders (WebP, full + 960 px)
 assets/fonts/     the four typefaces (WOFF2, Latin subset)
+tools/            image-sizes.py and set-domain.py
+pergola/, gijot/, na-kontakto/, ...   forwarding pages for the old site's addresses
 ```
 
 ## Running and publishing
 
 Open the site through any static server, e.g. `python3 -m http.server`, then visit http://localhost:8000.
 
-It's published with GitHub Pages from the `gh-pages` branch: https://ariongj.github.io/LoniKS/. `.nojekyll` is included so files are served as-is. If the site moves to another address (for example loni-ks.com), update the `canonical`, `og:` and structured-data URLs at the top of `index.html`, `robots.txt`, `sitemap.xml`, and the `/LoniKS/` links in `404.html`.
+It's published with GitHub Pages from the `gh-pages` branch: https://ariongj.github.io/LoniKS/. `.nojekyll` is included so files are served as-is. ### Moving to loni-ks.com
+
+```sh
+python3 tools/set-domain.py https://loni-ks.com/
+```
+
+This changes the address in the `canonical`, `og:` and structured-data tags, `robots.txt`, `sitemap.xml`, the forwarding pages and this README, makes the 404 page's links work from the domain root, and writes the `CNAME` file. Commit and push it, point the domain's DNS at GitHub Pages (four `A` records for the apex, a `CNAME` for `www` to `ariongj.github.io`), then turn on **Enforce HTTPS** in the repository's Pages settings. `robots.txt` only takes effect at the root of a domain, so it starts working at this point.
